@@ -23,6 +23,16 @@ statuses = [
     discord.Game("Brauser"),
     discord.Game("HOW TO CLOSE TERRARIA?"),
     discord.Game("HOW TO CLOSE VIM?"),
+    discord.Game("Polytoria"),
+    discord.Game("Polytoria 2.0"),
+    discord.Game("Polytoria with w7h"),
+    discord.Game("Classicube"),
+    discord.Game("SuperTux"),
+    discord.Game("SuperTuxKart"),
+    discord.Game("The Impossible Quiz"),
+    discord.Game("swzlr"),
+    discord.Activity(type=discord.ActivityType.watching, name="evil rob"),
+    discord.Activity(type=discord.ActivityType.watching, name="gučis"),
     discord.Activity(type=discord.ActivityType.watching, name="you"),
     discord.Activity(type=discord.ActivityType.watching, name="vsauce (or am i?)"),
     discord.Activity(type=discord.ActivityType.watching, name="NateXS"),
@@ -38,6 +48,7 @@ statuses = [
     discord.Activity(type=discord.ActivityType.watching, name="ASMR Whispering Stock Market Crashes 1929-2020"),
     discord.Activity(type=discord.ActivityType.watching, name="paint dry"),
     discord.Activity(type=discord.ActivityType.watching, name="your browser history"),
+    discord.Activity(type=discord.ActivityType.watching, name="dogo6647"),
     discord.Activity(type=discord.ActivityType.listening, name="White Noise Therapy ASMR"),
     discord.Activity(type=discord.ActivityType.listening, name="weezer"),
     discord.Activity(type=discord.ActivityType.listening, name="NoCopyrightSounds"),
@@ -53,6 +64,8 @@ statuses = [
     discord.Activity(type=discord.ActivityType.listening, name="dr giggletouch"),
     discord.Activity(type=discord.ActivityType.listening, name="dr hankyspanky"),
     discord.Activity(type=discord.ActivityType.listening, name="dj toenail"),
+    discord.Activity(type=discord.ActivityType.listening, name="dj swizzlerizzle"),
+    discord.Activity(type=discord.ActivityType.listening, name="some bytebeats"),
     None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
 ]
 
