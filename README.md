@@ -23,6 +23,8 @@ Share opinions, laugh together, and level up your server with a bot that can tal
 - `#!untrust <address>` (admin) - Stops trusting another server's address, blocking them from sending you letters.
 - `#!phonebook` - Presents all addresses trusted by the current server.
 - `#!send <address> <message>` - Sends a letter to a specified robmail address.
+## Behavior overrides:
+- `#!owobonk` - Hits Rob with the magic owo stick that temporarily uwuifies his responses.
 ## Misc:
 - `#!help` - Lists all options that can be modified in your server.
 - `#!about` - Shows bot credits and interaction stats.

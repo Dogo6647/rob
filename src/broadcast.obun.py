@@ -24,8 +24,9 @@ async def broadcast():
 
             owner_ping = guild.owner.mention if guild.owner else ""
 
-            await channel.send(f"{owner_ping}\n"
-                f"{changelog_text}"
+            await channel.send(
+                f"{owner_ping if '[noping]' not in changelog_text else ""}\n"
+                f"{changelog_text.replace('[noping]', '')}"
             )
 
         except Exception as e:

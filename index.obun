@@ -10,8 +10,15 @@ import aiohttp
 import asyncio
 import json
 import os
+import io
+import cv2
+import pytesseract
+from PIL import Image
+import tempfile
+import requests
+from contextlib import redirect_stdout
 import re
-from collections import defaultdict, deque
+from collections import defaultdict, deque, Counter
 from datetime import datetime
 from discord.gateway import DiscordWebSocket
 from discord.ext import tasks
@@ -68,6 +75,9 @@ CHANGELOG_FILE = "changelog.txt"
 
 CONFIG_DIR = "../rob-config/"
 DIALECT_PATH = "dialect.json"
+MNSSD_PROTO = "include/MobileNetSSD_deploy.prototxt"
+MNSSD_MODEL = "include/MobileNetSSD_deploy.caffemodel"
+net = cv2.dnn.readNetFromCaffe(MNSSD_PROTO, MNSSD_MODEL)
 
 def load_dialect():
     if os.path.exists(DIALECT_PATH):

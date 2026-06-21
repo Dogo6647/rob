@@ -31,7 +31,24 @@ async def generate_response(prompt, history, model="llama-3.1-8b-instant", dumb=
 
                 # /// ERROR MESSAGES ///
                 if resp.status == 429:
-                    return "gimme a sec i have other servers to talk to"
+                    errmsgs = [
+                        "gimme a sec i have other servers to talk to",
+                        "just a sec pls",
+                        "hold on",
+                        "lemme look that up",
+                        "hold on im hungry *chip bag noises*",
+                        "maybe",
+                        "yes",
+                        "yeahhhh :D",
+                        "no",
+                        ":) shut up",
+                        "whar :)",
+                        "what",
+                        "idk what your talkin abt :3",
+                        "ig :P",
+                        "idk :P"
+                    ]
+                    return random.choice(errmsgs)
                 elif resp.status == 413:
                     return "bro sent me the entire internet"
                 elif resp.status == 500:

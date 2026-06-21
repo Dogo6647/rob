@@ -1,3 +1,7 @@
 discord.py
 aiohttp
 python-dotenv
+opencv-python
+numpy
+requests
+pytesseract
