@@ -32,7 +32,6 @@ statuses = [
     discord.Game("The Impossible Quiz"),
     discord.Game("swzlr"),
     discord.Activity(type=discord.ActivityType.watching, name="evil rob"),
-    discord.Activity(type=discord.ActivityType.watching, name="gučis"),
     discord.Activity(type=discord.ActivityType.watching, name="you"),
     discord.Activity(type=discord.ActivityType.watching, name="vsauce (or am i?)"),
     discord.Activity(type=discord.ActivityType.watching, name="NateXS"),
