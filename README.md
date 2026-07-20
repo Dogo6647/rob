@@ -32,23 +32,16 @@ Share opinions, laugh together, and level up your server with a bot that can tal
 - `#!search` - Searches for stuff on the web using DuckDuckGo and provides a Rob-certified™ summary.
 
 # Development setup
-1. Install Obun
-```bash
-git clone https://github.com/Dogo6647/obun.git
-cd obun
-./install.sh
-```
-
-2. Clone this repo and install requirements
+1. Clone this repo and install requirements
 ```bash
 git clone https://github.com/Dogo6647/rob.git
 cd rob
 pip install -r requirements.txt
 ```
 
-3. Edit .env.example with your preferred text editor and rename it to .env
+2. Edit .env.example with your preferred text editor and rename it to .env
 
-4. Run the bot
+3. Run the bot
 ```
-obun -w
+python3 src/main.py
 ```

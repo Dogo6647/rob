@@ -1,4 +1,6 @@
-statuses = [
+import discord
+
+STATUSES = [
     discord.Game("Minecraft"),
     discord.Game("Minceraft"),
     discord.Game("Minecraft with garmin"),
@@ -55,13 +57,3 @@ statuses = [
     discord.Activity(type=discord.ActivityType.listening, name="dj toenail"),
     None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
 ]
-
-@tasks.loop(minutes=5)
-async def change_status():
-    global current_status
-    current_status = random.choice(statuses)
-    if current_status is None:
-        await client.change_presence(activity=None)
-    else:
-        await client.change_presence(activity=current_status)
-    print(f"Changed status to: {current_status.name if current_status else 'nothing'}")

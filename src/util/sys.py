@@ -1,3 +1,24 @@
+import asyncio, json, os, re, tempfile
+import aiohttp, cv2, pytesseract, requests
+from bs4 import BeautifulSoup
+from collections import Counter
+from ddgs import DDGS
+from PIL import Image
+
+CONFIG_DIR = "../rob-config/"
+DIALECT_PATH = "dialect.json"
+MNSSD_PROTO = "include/MobileNetSSD_deploy.prototxt"
+MNSSD_MODEL = "include/MobileNetSSD_deploy.caffemodel"
+net = cv2.dnn.readNetFromCaffe(MNSSD_PROTO, MNSSD_MODEL)
+
+def load_dialect():
+    if os.path.exists(DIALECT_PATH):
+        with open(DIALECT_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+dialect_map = load_dialect()
+
 def apply_dialect(text: str) -> str:
     for original, replacement in dialect_map.items():
         pattern = r'\b' + re.escape(original) + r'\b'
@@ -16,6 +37,7 @@ MNSSD_CLASSES = [
     "person", "pottedplant", "sheep", "sofa", "train",
     "tvmonitor"
 ]
+
 def describe(image_url: str, conf_threshold: float = 0.35) -> str:
     try:
         response = requests.get(image_url, timeout=10)

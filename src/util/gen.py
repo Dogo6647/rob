@@ -1,3 +1,28 @@
+import aiohttp, os, random, re
+from .markov import MarkovChain, MARKOV_CONFIG
+from .sys import apply_dialect
+
+LLM_KEY = os.getenv("LLM_KEY", None)
+LLM_LOCAL_URL = os.getenv("LLM_LOCAL_URL", "http://localhost:4891/v1/chat/completions")
+LLM_PROXY_URL = os.getenv("LLM_PROXY_URL", "https://api.groq.com/openai/v1/chat/completions")
+ERROR_MESSAGES = [
+    "gimme a sec i have other servers to talk to",
+    "just a sec pls",
+    "hold on",
+    "lemme look that up",
+    "hold on im hungry *chip bag noises*",
+    "maybe",
+    "yes",
+    "yeahhhh :D",
+    "no",
+    ":) shut up",
+    "whar :)",
+    "what",
+    "idk what your talkin abt :3",
+    "ig :P",
+    "idk :P"
+]
+
 def get_content(obj):
     last = None
     if isinstance(obj, dict):
@@ -14,10 +39,43 @@ def get_content(obj):
                 last = found
     return last
 
-async def generate_response(prompt, history, model="llama-3.1-8b-instant", dumb=False, where="a server"):
+def generate_markov(history) -> str:
+    # generate markov
+    texts = []
+
+    for msg in history:
+        content = msg.get("content", "")
+
+        if isinstance(content, list):
+            parts = []
+            for item in content:
+                if item.get("type") == "text":
+                    parts.append(item.get("text", ""))
+
+            content = " ".join(parts)
+
+        texts.append(content)
+
+    # last message becomes the point of departure
+    prompt = texts[-1]
+
+    # train chain from conversation history
+    chain = MarkovChain(order=MARKOV_CONFIG["chain_order"])
+    chain.train(texts)
+
+    output = chain.generate(prompt, max_tokens=MARKOV_CONFIG["max_tokens"])
+    return output
+
+async def generate_response(
+    prompt,
+    history,
+    model="llama-3.1-8b-instant",
+    dumb=False,
+    where="a server"
+):
     global current_status
     if dumb:
-        model="cas/llama-3.2-1b-instruct"
+        return generate_markov(history)
     else:
         model="meta-llama/llama-4-scout-17b-16e-instruct"
         #model="llama-3.3-70b-versatile"
@@ -36,7 +94,7 @@ async def generate_response(prompt, history, model="llama-3.1-8b-instant", dumb=
             "stream": False
         }
         #print(f":: Dropping the payload: \n {payload}") # debug, should not normally enable
-        async with session.post(LLM_LOCAL_URL if dumb else LLM_PROXY_URL, json=payload, headers={"Authorization": f"Bearer {LLM_KEY}"}) as resp:
+        async with session.post(LLM_PROXY_URL, json=payload, headers={"Authorization": f"Bearer {LLM_KEY}"}) as resp:
             if resp.status == 200:
                 data = await resp.json()
                 #print(data) # request data for debugging, should not be uncommented normally
@@ -56,24 +114,7 @@ async def generate_response(prompt, history, model="llama-3.1-8b-instant", dumb=
 
                 # /// ERROR MESSAGES ///
                 if resp.status == 429 or resp.status == 402:
-                    errmsgs = [
-                        "gimme a sec i have other servers to talk to",
-                        "just a sec pls",
-                        "hold on",
-                        "lemme look that up",
-                        "hold on im hungry *chip bag noises*",
-                        "maybe",
-                        "yes",
-                        "yeahhhh :D",
-                        "no",
-                        ":) shut up",
-                        "whar :)",
-                        "what",
-                        "idk what your talkin abt :3",
-                        "ig :P",
-                        "idk :P"
-                    ]
-                    return random.choice(errmsgs)
+                    return random.choice(ERROR_MESSAGES)
                 elif resp.status == 413:
                     return "bro sent me the entire internet"
                 elif resp.status == 500:
