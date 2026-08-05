@@ -10,7 +10,7 @@ async def send_random_message():
             if config["randomlyMessage"] and general_channels:
                 channel = random.choice(general_channels)
                 if channel:
-                    response = await generate_response("Say something as Rob based on the chat history; focus on the last sent message. If there are no messages, start the conversation by saying something interesting.", guild_message_histories[guild.id], config.get("model"), config.get("dumb"), f"the {guild.name} server")
+                    response = await generate_response("Say something as Rob based on the chat history; focus on the last sent message. If there are no messages, start the conversation by saying something interesting.", guild_message_histories[guild.id], config.get("model"), config, f"the {guild.name} server")
                     await channel.send(response)
                     guild_message_histories[guild.id].append({"role": "assistant", "content": response}) # {client.user.name} (you)
 

@@ -1,6 +1,6 @@
-def get_mail_channel(guild, config):
+def get_mail_channel(guild, config, force_general=False):
     # explicitly configured channel prioritized++
-    if config.get("mailChannel"):
+    if config.get("mailChannel") and not force_general:
         channel = guild.get_channel(config["mailChannel"])
         if channel and isinstance(channel, discord.TextChannel) and channel.permissions_for(guild.me).send_messages:
             return channel

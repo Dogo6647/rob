@@ -9,6 +9,7 @@ import random
 import aiohttp
 import asyncio
 import json
+import time
 import os
 import io
 import cv2
@@ -88,7 +89,13 @@ def load_dialect():
     return {}
 dialect_map = load_dialect()
 
+CLOUD_REQUEST_DELAY = 2.0 # minimum gap in seconds between cloud requests
+COOLDOWN = CLOUD_REQUEST_DELAY * 3 / 4
 tin_can_chance = 0.005
+frens = [
+    1455453433565020306, # gabriel (ddededodediamante)
+    974297735559806986 # GenAi (genai.bot)
+]
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -103,8 +110,9 @@ client = discord.Client(intents=intents) # , allowed_mentions=discord.AllowedMen
 #:section src/statuses.obun.py
 
 # Store message history per server and per user in DMs
-guild_message_histories = defaultdict(lambda: deque(maxlen=24))
-dm_message_histories = defaultdict(lambda: deque(maxlen=24))
+guild_message_histories = defaultdict(lambda: deque(maxlen=12))
+dm_message_histories = defaultdict(lambda: deque(maxlen=12))
+user_cooldowns = {}
 
 #:section src/sysutils.obun.py
 #:section src/guildconfig.obun.py
@@ -118,6 +126,7 @@ dm_message_histories = defaultdict(lambda: deque(maxlen=24))
 
 #:section src/events/ready.obun.py
 #:section src/events/join.obun.py
+#:section src/events/userjoin.obun.py
 #:section src/events/message.obun.py
 
 client.run(TOKEN)

@@ -1,5 +1,5 @@
     import requests
-    if message.content.startswith("#!dadjoke") and message.guild:
+    if message.content.startswith("#!dadjoke"):
         try:
             data = requests.get("https://icanhazdadjoke.com/", headers={"Accept": "application/json"})
             joke = data.json().get('joke')

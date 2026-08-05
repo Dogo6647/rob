@@ -12,8 +12,11 @@ Share opinions, laugh together, and level up your server with a bot that can tal
     - `randomlyMessage` (values: **enable/disable**) -- Allows the bot to send an unprompted message at a random time when the chat is inactive. - Default is **disable**
     - `responseFrequency` (values: **a number from 1-100**, default **4**) -- Controls the chances of Rob responding to a message without being pinged to do so (a higher number means more often, recommended values are 0-4 if your server isn't Rob-centric) - Default is **4**
     - `listen` (values: **enable/disable**) -- Turns the bot on when enabled or off when disabled. - Default is **enable**
-    - `dumb` (values: **enable/disable**) -- Controls whether to generate messages locally instead of using groqcloud's API, which may produce less coherent responses and may not use a full-fat AI model all the time. **This is currently an UNSTABLE feature as it may make the bot faster, slower, or not work at all.** - Default is **disable**
+    - `dumb` (values: **enable/disable**) -- Controls whether to generate messages with a lightweight model hosted by us instead of using groqcloud's API, which may produce less coherent responses. - Default is **disable**
     - `mailChannel` (values: **channel name starting with #**) -- Sets the channel to use for receiving letters from other servers. - Auto-detects your general channel by default.
+    - `autoSearch` (values: **enable/disable**) -- Controls whether Rob can perform searches on his own or not. - Default is **disable**
+    - `greet` (values: **enable/disable**) -- Make Rob automatically welcome new members in your server! - Default is **disable**
+    - `announcements` (values: **enable/disable**) -- Receive important Rob announcements in your server. - Default is **enable**
 4. Send your first message to Rob by @mentioning him!
 
 # Commands
@@ -25,11 +28,14 @@ Share opinions, laugh together, and level up your server with a bot that can tal
 - `#!send <address> <message>` - Sends a letter to a specified robmail address.
 ## Behavior overrides:
 - `#!owobonk` - Hits Rob with the magic owo stick that temporarily uwuifies his responses.
+- `#!britbonk` - Turns Rob into a fine british gentleman.
 ## Misc:
 - `#!help` - Sends a link to Rob's official website.
 - `#!about` - Shows bot credits and interaction stats.
-- `#!dadjoke` - Sends a random joke from the [icanhazadadjoke](https://icanhazdadjoke.com/) API.
+- `#!quota` - Shows how much the bot has used the groqcloud API.
 - `#!search` - Searches for stuff on the web using DuckDuckGo and provides a Rob-certified™ summary.
+- `#!dadjoke` - Sends a random joke from the [icanhazadadjoke](https://icanhazdadjoke.com/) API
+- `#!module` - Gets a random song from [modarchive.org](https://modarchive.org/). Keep in mind *some* of the content there may be explicit!
 
 # Development setup
 1. Install Obun

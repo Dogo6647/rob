@@ -3,7 +3,7 @@
         reset_stats()
 
         await message.channel.send(f"haiiiii im rob, a conversational bot created by `dogo6647` :)")
-        await message.channel.send(f"im currently in {len(client.guilds)} servers and have met {sum(g.member_count for g in client.guilds)} users, isnt that cool? :D")
+        await message.channel.send(f"im currently in {len(client.guilds)} servers with {sum(g.member_count for g in client.guilds)} members in total and have talked to {len(user_cooldowns)} ppl today, isnt that cool? :D")
 
         this_guild_msgs = guild_daily_stats[message.guild.id]
         for guild in client.guilds:
@@ -19,5 +19,5 @@
 
         if top_10:
             top_servers = "\n".join(f"{i+1}. {name} ({members} members) - {msgs} interactions today" for i, (name, members, msgs) in enumerate(top_10))
-            await message.channel.send(f"i've sent {this_guild_msgs} messages in this server today, heres today's biggest rob addicts:\n```{top_servers}```")
+            await message.channel.send(f"heres today's biggest rob addicts ({this_guild_msgs} interactions from this server):\n```{top_servers}```")
         return

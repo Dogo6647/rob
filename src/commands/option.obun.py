@@ -5,6 +5,10 @@
             return
         if len(parts) < 3:
             await message.channel.send("#!option <optionId> <value>\nthats how you do it btw ;3")
+            await message.channel.send(
+                "heres my options you can change :)\n" +
+                "\n".join(f"- `{key}` - set to **{value}**" for key, value in config.items())
+            )
             return
         
         role = discord.utils.get(message.guild.roles, name="RobAdmin")
@@ -15,8 +19,12 @@
         option, value = parts[1], parts[2]
         if option in config:
             if not option == "model" and not option == "mailChannel" and not option == "mailTrusted":
-                if value.lower() in ["enable", "disable"]:
-                    config[option] = value.lower() == "enable"
+                TRUE_VALUES = {"enable", "enabled", "on", "true", "yes"}
+                FALSE_VALUES = {"disable", "disabled", "off", "false", "no"}
+                if value.lower() in TRUE_VALUES:
+                    config[option] = True
+                elif value.lower() in FALSE_VALUES:
+                    config[option] = False
                 else:
                     try:
                         config[option] = int(value)

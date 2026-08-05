@@ -19,18 +19,20 @@ async def broadcast():
             config = load_config(guild.id)
             channel = get_mail_channel(guild, config)
 
-            if not channel:
+            if not channel or not config.get("mailChannel") or not config.get("announcements"):
                 continue
 
             owner_ping = guild.owner.mention if guild.owner else ""
 
             await channel.send(
                 f"{owner_ping if '[noping]' not in changelog_text else ""}\n"
-                f"{changelog_text.replace('[noping]', '')}"
+                f"{changelog_text.replace('[noping]', '')}\n"
+                "-# ⚠️ Most Rob updates are sent through the official server, but the bot itself is used to send important announcements like this one from time to time such as major updates and service statuses. If you would like to disable this behavior, use `#!option announcements disable`."
             )
+            print(f":: Sent to {guild.id} successfully")
 
         except Exception as e:
-            print(f":: Failed to send changelog to {guild.name}: {e}")
+            print(f":: Failed to send changelog to {guild.name} ({guild.id}): {e}")
 
     with open(CHANGELOG_FILE, "w", encoding="utf-8") as f:
         f.write("[sent]\n" + raw)

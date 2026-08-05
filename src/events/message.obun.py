@@ -1,5 +1,5 @@
 @client.event
-async def on_message(message):    
+async def on_message(message):
     if message.guild:
         guild_id = message.guild.id
         config = load_config(guild_id)
@@ -18,6 +18,8 @@ async def on_message(message):
 
     if message.author == client.user:
         history.append({"role": "assistant", "content": message.content})
+        if message.guild:
+            guild_daily_stats[message.guild.id] += 1
         return # Ignore itself lol
     
     # --- BOT COMMANDS ---
@@ -31,7 +33,10 @@ async def on_message(message):
     #:section src/commands/phonebook.obun.py
     #:section src/commands/dadjoke.obun.py
     #:section src/commands/owobonk.obun.py
+    #:section src/commands/britbonk.obun.py
     #:section src/commands/search.obun.py
+    #:section src/commands/quota.obun.py
+    #:section src/commands/module.obun.py
     # ------------------
     
     if not config["listen"]:
@@ -41,6 +46,14 @@ async def on_message(message):
     should_reply = client.user.mentioned_in(message) or message.reference is not None
     
     if should_respond:
+        # Cooldown
+        now = time.monotonic()
+        last = user_cooldowns.get(message.author.id, 0)
+        if now - last < COOLDOWN:
+            print(f":: [WARN] Cooldown triggered by {re.sub(r"[a-zA-Z]", "x", message.author.name)} ({message.author.id})")
+            return
+        user_cooldowns[message.author.id] = now
+
         async with message.channel.typing():
             num_responses = random.choices([1, 2], weights=[85, 15], k=1)[0]
 
@@ -49,37 +62,44 @@ async def on_message(message):
                     if random.randint(0, 1) == 0:
                         response = "*tin can noises*"
                     else:
-                        response = "https://odysea.us.to/assets/dump/iamarobot.mov"
+                        if datetime.now().month == 10:
+                            response = "https://odysea.us.to/assets/dump/spookyscaryskeletons.mp4"
+                        else:
+                            response = "https://odysea.us.to/assets/dump/iamarobot.mov"
                 else:
                     #print('response' if i == 0 else 'continuation')
                     response = await generate_response(
-                        'respond' if i == 0 else 'continue Rob\'s previous message',
+                        'respond as Rob to the last message' if i == 0 else 'continue Rob\'s previous message with more information',
                         history,
                         config.get("model"),
-                        config.get("dumb"),
+                        config,
                         f"the {message.guild.name} server" if message.guild else "DMs"
                     )
 
                 if (history and history[-1]["role"] == "assistant" and history[-1]["content"] == response):
                     continue
+                else:
+                    response = response.replace(history[-1]["content"], "")
+                    if not message.guild:
+                        history.append({"role": "assistant", "content": response})
 
-                if "[searchfor: " in response:
+                if "[searchfor:" in response:
                     should_reply = False
 
                 if should_reply and i == 0:
-                    await message.reply(response,  mention_author=False)
+                    await message.reply(response, mention_author=True if message.author.id in frens else False)
                 else:
-                    if "[searchfor: " in response:
+                    if "[searchfor:" in response:
                         async def update_status(text):
                             await message.channel.send(text)
 
                         q = response[len("[searchfor:"): -1].strip()
                         result = await websearch(q, update_status)
                         response = await generate_response(
-                            f"Summarize the following text so that it's relevant to the conversation: '{result}'. Use the amount of words necessary to make a detailed explanation.",
+                            f"Summarize the following text so that it's relevant to the conversation: '{result}'. Use the amount of words necessary to make a detailed explanation. DO NOT use [searchfor: (query)] again.",
                             history,
                             config.get("model"),
-                            config.get("dumb"),
+                            config,
                             f"the {message.guild.name} server" if message.guild else "DMs"
                         )
                         await message.channel.send(response)
@@ -89,6 +109,3 @@ async def on_message(message):
                 # sleep between responses, not after the last one
                 if i < num_responses - 1:
                     await asyncio.sleep(random.uniform(0.5, 2))
-
-        if message.guild:
-            guild_daily_stats[message.guild.id] += num_responses

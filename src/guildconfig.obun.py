@@ -3,7 +3,7 @@ def load_config(guild_id):
     if os.path.exists(config_path):
         with open(config_path, "r") as f:
             return json.load(f)
-    return {"randomlyMessage": False, "responseFrequency": 4, "listen": True, "dumb": False, "mailTrusted": [], "mailChannel": None}
+    return {"randomlyMessage": False, "responseFrequency": 4, "listen": True, "dumb": False, "mailTrusted": [], "mailChannel": None, "autoSearch": False, "greet": True, "announcements": True}
 
 def save_config(guild_id, config):
     os.makedirs(CONFIG_DIR, exist_ok=True)

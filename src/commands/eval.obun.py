@@ -4,11 +4,12 @@
         buffer = io.StringIO()
 
         try:
-            with redirect_stdout(buffer):
-                exec(code)
+            async with message.channel.typing():
+                with redirect_stdout(buffer):
+                    exec(code)
 
             output = buffer.getvalue() or "(no output)"
-            await message.channel.send(f"```\n{output}\n```")
+            await message.channel.send(f"```\n{output[-1992:]}\n```")
         except Exception as e:
             await message.channel.send(f"```\n{type(e).__name__}: {e}\n```")
         return
