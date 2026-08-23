@@ -34,6 +34,7 @@ async def on_message(message):
     #:section src/commands/dadjoke.obun.py
     #:section src/commands/owobonk.obun.py
     #:section src/commands/britbonk.obun.py
+    #:section src/commands/custombonk.obun.py
     #:section src/commands/search.obun.py
     #:section src/commands/quota.obun.py
     #:section src/commands/module.obun.py
@@ -42,7 +43,7 @@ async def on_message(message):
     if not config["listen"]:
         return
     
-    should_respond = message.mention_everyone or client.user.mentioned_in(message) or random.random() < (config["responseFrequency"] / 100)
+    should_respond = message.mention_everyone or client.user.mentioned_in(message) or random.random() < (max(0, min(config["responseFrequency"], 100)) / 100)
     should_reply = client.user.mentioned_in(message) or message.reference is not None
     
     if should_respond:

@@ -32,9 +32,9 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
     else:
         #model="meta-llama/llama-4-scout-17b-16e-instruct"
         #model="llama-3.3-70b-versatile"
-        model="llama-3.1-8b-instant"
+        #model="llama-3.1-8b-instant"
         #model="cas/llama-3.2-1b-instruct"
-        #model="qwen/qwen3.6-27b"
+        model="qwen/qwen3.6-27b"
     #print(f":: Generating response for: {prompt}") # debug, should not normally enable
     #print(f":: Message history dump: {history}") # debug, should not normally enable
     #print(where) # debug, should not normally enable
@@ -46,7 +46,8 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
                 *history,
                 {"role": "user", "content": prompt}
             ],
-            "stream": False
+            "stream": False,
+            "reasoning_effort": "none"
         }
         #print(f":: Dropping the payload: \n {payload}") # debug, should not normally enable
         async with session.post(LLM_LOCAL_URL if config.get("dumb") else LLM_PROXY_URL, json=payload, headers={"Authorization": f"Bearer {LLM_KEY}"}) as resp:

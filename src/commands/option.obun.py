@@ -27,7 +27,7 @@
                     config[option] = False
                 else:
                     try:
-                        config[option] = int(value)
+                        config[option] = max(0, min(int(value), 100))
                     except ValueError:
                         await message.channel.send("no not like that :X\nuse `enable`, `disable`, or a number")
                         return
@@ -47,7 +47,7 @@
             else:
                 config[option] = value
             save_config(guild_id, config)
-            await message.channel.send(f"alr, `{option}` is now `{value}` :)")
+            await message.channel.send(f"alr, `{option}` is now `{config[option]}` :)")
         else:
             await message.channel.send(f"umm idk what a `{option}` is :/")
         return

@@ -22,6 +22,9 @@ from bs4 import BeautifulSoup
 from contextlib import redirect_stdout
 import re
 from collections import defaultdict, deque, Counter
+import numpy as np
+import soundfile as sf
+from scipy.signal import resample_poly
 from datetime import datetime
 from discord.gateway import DiscordWebSocket
 from discord.ext import tasks

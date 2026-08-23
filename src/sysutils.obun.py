@@ -95,6 +95,52 @@ def ocr(image_url: str) -> str | None:
         print(f"OCR error: {e}")
         return None
 
+def describe_audio(path: str) -> str:
+    try:
+        y, sr = sf.read(path, dtype="float32", always_2d=False)
+        if y.ndim > 1: y = np.mean(y, axis=1)
+        y = y[:sr * 60]
+        if sr != 16000: y = resample_poly(y, 16000, sr); sr = 16000
+
+        length = len(y) / sr
+        rms = np.array([np.sqrt(np.mean(y[i:i+2048]**2)) for i in range(0, len(y)-2048, 2048)])
+        loudness = float(np.clip(np.mean(rms) * 3.75, 0, 1))
+
+        freqs = np.fft.rfftfreq(len(y), 1/sr)
+        active = freqs[np.abs(np.fft.rfft(y)) > np.abs(np.fft.rfft(y)).max() * 0.05]
+        low_freq, high_freq = (int(active.min()), int(active.max())) if len(active) else (0, 0)
+
+        pk, peaks = [], []
+        for i in range(1, len(rms)-1):
+            if rms[i] > rms[i-1] and rms[i] >= rms[i+1] and rms[i] > 0.2 and (not pk or i - pk[-1] >= 5):
+                pk.append(i)
+        peak_count = len(pk) * 2 - 2
+
+        genre = (
+            ("Sounds like someone talking" if loudness < 0.7 else "Sounds like someone yelling at the mic")
+            if low_freq < 5 and high_freq > 3800 else
+            ("Sounds like chill techno music" if loudness < 0.5 or low_freq > 16 else "Sounds like EDM music")
+            if low_freq < 23 and high_freq > 1000 and peak_count > 3 else
+            (("Sounds like upbeat drum music" if peak_count > length * 3 else "Sounds like rock music")
+             if low_freq < 40 and loudness > 0.5 else "Sounds like acoustic music")
+            if low_freq < 60 and high_freq > 2000 and peak_count > 3 else
+            "Sounds like a sick rhythmic track" if loudness > 0.50 and peak_count > length and peak_count > 3 else
+            ("Sounds like a funny loud sound" if loudness > 0.92 else "Sounds like a short sound effect")
+            if length < 4 else
+            "Sounds like ambient music or audio"
+        )
+        loud_label = (
+            "Too quiet" if loudness < 0.01 else "Very quiet" if loudness < 0.05 else
+            "Quiet" if loudness < 0.15 else "Pretty good" if loudness < 0.5 else
+            "Loud" if loudness < 0.7 else "Very loud" if loudness < 0.92 else "EXTREMELY LOUD"
+        )
+
+        mins, secs = int(length // 60), int(length % 60)
+        return f"{genre}, it's {loud_label}."
+    except Exception as e:
+        print(e)
+        return "Couldn't read audio"
+
 def process_msg(message):
     parts = []
     content = message.clean_content.strip()
@@ -112,6 +158,18 @@ def process_msg(message):
             textcontent = ocr(attachment.url)
             if textcontent:
                 info.append(f'Has text which reads: "{textcontent[:100]}"')
+
+        elif attachment.content_type and attachment.content_type.startswith("audio/"):
+            with tempfile.NamedTemporaryFile(suffix=os.path.splitext(attachment.filename)[1], delete=False) as f:
+                response = requests.get(attachment.url, timeout=10)
+                response.raise_for_status()
+                f.write(response.content)
+                tmp_path = f.name
+            try:
+                desc = describe_audio(tmp_path)
+                info.append(desc)
+            finally:
+                os.remove(tmp_path)
 
         parts.append(f"[Attachment: {', '.join(info)}]")
 
