@@ -25,7 +25,7 @@ async def broadcast():
             owner_ping = guild.owner.mention if guild.owner else ""
 
             await channel.send(
-                f"{owner_ping if '[noping]' not in changelog_text else ""}\n"
+                f"{owner_ping if '[noping]' not in changelog_text else ''}\n"
                 f"{changelog_text.replace('[noping]', '')}\n"
                 "-# ⚠️ Most Rob updates are sent through the official server, but the bot itself is used to send important announcements like this one from time to time such as major updates and service statuses. If you would like to disable this behavior, use `#!option announcements disable`."
             )
