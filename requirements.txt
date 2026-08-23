@@ -7,3 +7,5 @@ requests
 pytesseract
 bs4
 ddgs
+soundfile
+scipy
