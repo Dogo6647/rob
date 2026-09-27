@@ -48,6 +48,7 @@ statuses = [
     discord.Activity(type=discord.ActivityType.watching, name="paint dry"),
     discord.Activity(type=discord.ActivityType.watching, name="your browser history"),
     discord.Activity(type=discord.ActivityType.watching, name="dogo6647"),
+    discord.Activity(type=discord.ActivityType.watching, name="Instagram Reels"),
     discord.Activity(type=discord.ActivityType.listening, name="White Noise Therapy ASMR"),
     discord.Activity(type=discord.ActivityType.listening, name="weezer"),
     discord.Activity(type=discord.ActivityType.listening, name="NoCopyrightSounds"),

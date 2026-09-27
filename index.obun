@@ -85,6 +85,11 @@ MNSSD_PROTO = "include/MobileNetSSD_deploy.prototxt"
 MNSSD_MODEL = "include/MobileNetSSD_deploy.caffemodel"
 net = cv2.dnn.readNetFromCaffe(MNSSD_PROTO, MNSSD_MODEL)
 
+VC_TMP_DIR = "/tmp/rob-tts"
+os.makedirs(VC_TMP_DIR, exist_ok=True)
+VOSK_SAMPLE_RATE = 16000
+DISCORD_SAMPLE_RATE = 48000
+
 def load_dialect():
     if os.path.exists(DIALECT_PATH):
         with open(DIALECT_PATH, "r", encoding="utf-8") as f:
@@ -97,7 +102,8 @@ COOLDOWN = CLOUD_REQUEST_DELAY * 3 / 4
 tin_can_chance = 0.005
 frens = [
     1455453433565020306, # gabriel (ddededodediamante)
-    974297735559806986 # GenAi (genai.bot)
+    974297735559806986, # GenAi (genai.bot)
+    1544457809272373279 # pacembot (nishi.boats)
 ]
 
 intents = discord.Intents.default()
@@ -114,6 +120,7 @@ client = discord.Client(intents=intents) # , allowed_mentions=discord.AllowedMen
 
 # Store message history per server and per user in DMs
 guild_message_histories = defaultdict(lambda: deque(maxlen=12))
+guild_vc_histories = defaultdict(lambda: deque(maxlen=12))
 dm_message_histories = defaultdict(lambda: deque(maxlen=12))
 user_cooldowns = {}
 
@@ -123,6 +130,7 @@ user_cooldowns = {}
 #:section src/broadcast.obun.py
 #:section src/channeldetect.obun.py
 #:section src/response.obun.py
+#:section src/vc.obun.py
 
 #:section src/components/letter.obun.py
 #:section src/components/phonebook.obun.py

@@ -4,6 +4,95 @@ def apply_dialect(text: str) -> str:
         text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
     return text
 
+SPLIT_BEFORE = {
+    "oh", "but", "so", "also", "idk"
+}
+SPLIT_AFTER = {
+    "too", "lol", "lmao"
+}
+def split_response(text):
+    text = text.strip()
+    if not text:
+        return []
+
+    protected = {}
+    def protect(match):
+        key = f"\x00{len(protected)}\x00"
+        protected[key] = match.group(0)
+        return key
+
+    text = re.sub(r"```[\s\S]*?```", protect, text)
+    text = re.sub(r"`[^`]+`", protect, text)
+    text = re.sub(r"https?://\S+", protect, text)
+
+    text = re.sub(r"[ \t]+", " ", text)
+    processed = []
+
+    paragraphs = text.splitlines()
+    for paragraph in paragraphs:
+        paragraph = paragraph.strip()
+        if not paragraph:
+            continue
+        paragraph = re.sub(r"([.!?])(?=\s|$)", r"\1\n", paragraph)
+
+        # split commas only when there is enough text after them
+        def comma_split(match):
+            before = match.group(1).strip()
+            after = match.group(2).strip()
+
+            words_after = re.findall(r"\b[\w'-]+\b", after)
+            if len(words_after) <= 3:
+                return f"{before}, {after}"
+
+            return f"{before}\n{after}"
+
+        paragraph = re.sub(r"([^,\n]+),\s*([^,\n]+)", comma_split, paragraph)
+        processed.append(paragraph)
+
+    text = "\n".join(processed)
+    lines = []
+    current = []
+
+    for token in re.split(r"(\s+)", text):
+        if not token:
+            continue
+
+        if "\n" in token:
+            if current:
+                lines.append("".join(current).strip())
+                current = []
+            continue
+        current.append(token)
+
+        joined = "".join(current).strip()
+
+        words = joined.split()
+        if not words:
+            continue
+
+        last_word = re.sub(r"^[^\w'-]+|[^\w'-]+$", "", words[-1]).lower()
+        if last_word in SPLIT_BEFORE and len(words) > 1:
+            lines.append(joined)
+            current = []
+        elif last_word in SPLIT_AFTER and len(words) >= 3:
+            lines.append(joined)
+            current = []
+
+    if current:
+        lines.append("".join(current).strip())
+
+    restored = []
+
+    for line in lines:
+        for key, value in protected.items():
+            line = line.replace(key, value)
+
+        if line.strip():
+            restored.append(line.strip())
+
+    restored = [item.replace(",", "") for item in restored]
+    return restored
+
 def guild_address(guild):
     slug = re.sub(r"[^a-z0-9]+", "-", guild.name.lower())
     slug = slug.strip("-")
@@ -12,9 +101,9 @@ def guild_address(guild):
 MNSSD_CLASSES = [
     "background", "aeroplane", "bicycle", "bird", "boat",
     "bottle", "bus", "car", "cat", "chair",
-    "cow", "diningtable", "dog", "horse", "motorbike",
-    "person", "pottedplant", "sheep", "sofa", "train",
-    "tvmonitor"
+    "cow", "dining table", "dog", "horse", "motorbike",
+    "person", "potted plant", "sheep", "sofa", "train",
+    "screen"
 ]
 def describe(image_url: str, conf_threshold: float = 0.35) -> str:
     try:
@@ -141,10 +230,30 @@ def describe_audio(path: str) -> str:
         print(e)
         return "Couldn't read audio"
 
-def process_msg(message):
+async def process_msg(message):
     parts = []
     content = message.clean_content.strip()
-    
+
+    if message.reference and message.reference.message_id:
+        replied_to = message.reference.resolved
+
+        if not isinstance(replied_to, discord.Message):
+            try:
+                replied_to = await message.channel.fetch_message(message.reference.message_id)
+            except discord.NotFound:
+                replied_to = None
+            except discord.Forbidden:
+                replied_to = None
+
+        if replied_to:
+            replied_content = replied_to.clean_content.strip()
+            max_length = 64
+            if len(replied_content) > max_length:
+                replied_content = replied_content[:max_length - 3] + "..."
+            parts.append(f'> {replied_content}\n\n')
+        else:
+            parts.append(f"> Replying to a past message from someone\n\n")
+
     if content:
         parts.append(content)
 
@@ -152,10 +261,12 @@ def process_msg(message):
         info = [f"name={attachment.filename}"]
 
         if attachment.content_type and attachment.content_type.startswith("image/"):
-            desc = describe(attachment.url)
+            desc, textcontent = await asyncio.gather(
+                asyncio.to_thread(describe, attachment.url),
+                asyncio.to_thread(ocr, attachment.url)
+            )
             info.append(desc)
 
-            textcontent = ocr(attachment.url)
             if textcontent:
                 info.append(f'Has text which reads: "{textcontent[:100]}"')
 
@@ -166,7 +277,7 @@ def process_msg(message):
                 f.write(response.content)
                 tmp_path = f.name
             try:
-                desc = describe_audio(tmp_path)
+                desc = await asyncio.to_thread(describe_audio, tmp_path)
                 info.append(desc)
             finally:
                 os.remove(tmp_path)
@@ -197,8 +308,8 @@ def process_msg(message):
             parts.append("[Embed] " + " - ".join(embed_parts))
 
 
-    final_msg = " ".join(parts)
-    return f"{message.author.name} {f'(in #{message.channel})' if message.guild else ''} said: {final_msg}"
+    final_msg = " ".join(parts)[:512]
+    return f"{message.author.name} {f'(in #{message.channel})' if message.guild else ''}: {final_msg}"
 
 async def websearch(query: str, status_callback=None):
     if status_callback:
