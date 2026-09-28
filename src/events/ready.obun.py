@@ -37,7 +37,7 @@ async def populate_guild_message_history(guild):
 async def send_random_message():
     await client.wait_until_ready()
     while not client.is_closed():
-        wait_time = random.randint(1, 2880) * 60
+        wait_time = random.randint(1, 4320) * 60
         print(f":: Waiting for {wait_time} seconds before sending a random message.")
         await asyncio.sleep(wait_time)
         for guild in client.guilds:

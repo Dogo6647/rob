@@ -1,4 +1,4 @@
-    if message.content.startswith("#!about") and message.guild:
+    if message.content.startswith(f"{cmdprefix}about") and message.guild:
         ranked = []
         reset_stats()
 

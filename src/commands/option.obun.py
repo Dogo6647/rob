@@ -1,10 +1,10 @@
-    if message.content.startswith("#!option") and message.guild:
+    if message.content.startswith(f"{cmdprefix}option") and message.guild:
         parts = message.content.split()
         if len(parts) == 2:
             await message.channel.send(f"its `{config[parts[1]]}`")
             return
         if len(parts) < 3:
-            await message.channel.send("#!option <optionId> <value>\nthats how you do it btw ;3")
+            await message.channel.send(f"{cmdprefix}option <optionId> <value>\nthats how you do it btw ;3")
             await message.channel.send(
                 "heres my options you can change :)\n" +
                 "\n".join(f"- `{key}` - set to **{value}**" for key, value in config.items())
@@ -42,7 +42,7 @@
                     await message.channel.send("give me a channel mention or channel id")
                     return
             elif option == "mailTrusted" or option == "model":
-                await message.channel.send("you cannot change that part of my config with #!option :X")
+                await message.channel.send(f"you cannot change that part of my config with {cmdprefix}option :X")
                 return
             else:
                 config[option] = value

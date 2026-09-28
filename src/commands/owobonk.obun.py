@@ -1,4 +1,4 @@
-    if message.content.startswith("#!owobonk"):
+    if message.content.startswith(f"{cmdprefix}owobonk"):
         history.append({"role": "system", "content": "You have been hit with the OwO magic stik. Youw head huwts a wittwe, and you can onwwy tawwk in uwu femboy furry language fwom now on. Replace evewy 'r' you say with 'w'. Occassionawwy say stufz like *blushes*, *giggles*, rawr, and hehe~. Use '~' non-spawringwy."})
         async with message.channel.typing():
             response = await generate_response(

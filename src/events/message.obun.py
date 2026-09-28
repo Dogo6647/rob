@@ -25,6 +25,7 @@ async def on_message(message):
         return # Ignore itself lol
     
     # --- BOT COMMANDS ---
+    cmdprefix =  os.getenv("CMD_PREFIX", "#!")
     #:section src/commands/option.obun.py
     #:section src/commands/help.obun.py
     #:section src/commands/about.obun.py

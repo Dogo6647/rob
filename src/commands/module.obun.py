@@ -1,4 +1,4 @@
-    if message.content.startswith("#!module"):
+    if message.content.startswith(f"{cmdprefix}module"):
             MODARCHIVE_RANDOM = "https://modarchive.org/index.php?request=view_random"
             MOD_EXTENSIONS = {".mod", ".xm", ".it", ".s3m", ".669", ".amf", ".ams", ".dbm", ".dmf",
                               ".dsm", ".far", ".mdl", ".med", ".mtm", ".okt", ".ptm", ".stm", ".ult",
@@ -18,7 +18,7 @@
 
                     module_page_url = None
 
-                    if command in ("random", ) or message.content.strip() == "#!module":
+                    if command in ("random", ) or message.content.strip() == f"{cmdprefix}module":
                         async with session.get(MODARCHIVE_RANDOM, allow_redirects=True) as r:
                             html = await r.text()
                             final_url = str(r.url)
@@ -26,7 +26,7 @@
 
                     elif command == "search":
                         if len(parts) < 3:
-                            await message.channel.send("its like #!module search <query>")
+                            await message.channel.send(f"its like {cmdprefix}module search <query>")
                             return
                         query = parts[2].strip()
                         search_url = f"https://modarchive.org/index.php?request=search&query={aiohttp.helpers.URL(query).path}&submit=Find&search_type=filename_or_songtitle"
@@ -62,7 +62,7 @@
 
                     elif command == "artist":
                         if len(parts) < 3:
-                            await message.channel.send("its like #!module artist <artist>")
+                            await message.channel.send(f"its like {cmdprefix}module artist <artist>")
                             return
                         artist = parts[2].strip()
                         artist_url = f"https://modarchive.org/index.php?query={aiohttp.helpers.URL(artist).path}&submit=Find&request=search&search_type=guessed_artist"
@@ -83,10 +83,10 @@
                         module_page_url = f"https://modarchive.org/{href}" if not href.startswith("http") else href
 
                     else:
-                        await message.channel.send("its like #!module <random|search|spotlit|featured|artist>")
+                        await message.channel.send(f"its like {cmdprefix}module <random|search|spotlit|featured|artist>")
                         return
 
-                    if command != "random" and message.content.strip() != "#!module":
+                    if command != "random" and message.content.strip() != f"{cmdprefix}module":
                         async with session.get(module_page_url, allow_redirects=True) as r:
                             try:
                                 html = await r.text()

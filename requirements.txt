@@ -2,7 +2,7 @@ discord.py
 git+https://github.com/rdphillips7/discord-ext-voice-recv.git@main
 aiohttp
 python-dotenv
-opencv-python
+opencv-python<5
 numpy
 requests
 pytesseract

@@ -1,5 +1,5 @@
-    if message.content.startswith("#!custombonk"):
-        bonk = message.content.split("#!custombonk", 1)[1].strip()
+    if message.content.startswith(f"{cmdprefix}custombonk"):
+        bonk = message.content.split(f"{cmdprefix}custombonk", 1)[1].strip()
         history.append({"role": "system", "content": f"{bonk}"})
         async with message.channel.typing():
             response = await generate_response(

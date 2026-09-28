@@ -1,9 +1,9 @@
-    if message.content.startswith("#!phonebook") and message.guild:
+    if message.content.startswith(f"{cmdprefix}phonebook") and message.guild:
         trusted = config.get("mailTrusted", [])
 
         if not trusted:
             await message.channel.send(
-                "this server's phonebook is empty :(\nuse `#!trust <address>` to add servers"
+                f"this server's phonebook is empty :(\nuse `{cmdprefix}trust <address>` to add servers"
             )
             return
 

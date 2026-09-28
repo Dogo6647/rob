@@ -1,8 +1,8 @@
-    if message.content.startswith("#!send") and message.guild:
+    if message.content.startswith(f"{cmdprefix}send") and message.guild:
         parts = message.content.split(maxsplit=2)
 
         if len(parts) < 3:
-            await message.channel.send("its like #!send <address> <message>")
+            await message.channel.send(f"its like {cmdprefix}send <address> <message>")
             return
 
         target_address = parts[1]
@@ -24,11 +24,11 @@
         receiver_cfg = load_config(target_guild.id)
 
         if target_address not in sender_cfg["mailTrusted"]:
-            await message.channel.send(f"that address isn't on your trusted list, run '#!trust {target_address}'")
+            await message.channel.send(f"that address isn't on your trusted list, run '{cmdprefix}trust {target_address}'")
             return
 
         if sender_address not in receiver_cfg["mailTrusted"]:
-            await message.channel.send(f"that server hasn't trusted you yet, ask them to run '#!trust {sender_address}'")
+            await message.channel.send(f"that server hasn't trusted you yet, ask them to run '{cmdprefix}trust {sender_address}'")
             return
 
         channel = get_mail_channel(target_guild, receiver_cfg)

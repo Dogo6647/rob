@@ -1,5 +1,5 @@
-    if message.content.startswith("#!eval") and str(message.author.id) == str(OWNER_ID):
-        code = message.content.replace("#!eval ", "")
+    if message.content.startswith(f"{cmdprefix}eval") and str(message.author.id) == str(OWNER_ID):
+        code = message.content.replace(f"{cmdprefix}eval ", "")
         print(f":: [SECURITY WARNING] - executing eval '{code}'.")
         buffer = io.StringIO()
 

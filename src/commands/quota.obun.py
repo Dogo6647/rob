@@ -1,4 +1,4 @@
-    if message.content.startswith("#!quota"):
+    if message.content.startswith(f"{cmdprefix}quota"):
         def progress_bar(remaining, total, length=24):
             if remaining is None or total is None or total == 0:
                 return "[unknown]"

@@ -1,5 +1,5 @@
     import requests
-    if message.content.startswith("#!dadjoke"):
+    if message.content.startswith(f"{cmdprefix}dadjoke"):
         try:
             data = requests.get("https://icanhazdadjoke.com/", headers={"Accept": "application/json"})
             joke = data.json().get('joke')

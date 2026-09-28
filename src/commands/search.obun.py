@@ -1,5 +1,5 @@
-    if message.content.startswith("#!search"):
-        q = message.content.replace("#!search ", "")
+    if message.content.startswith(f"{cmdprefix}search"):
+        q = message.content.replace(f"{cmdprefix}search ", "")
 
         async def update_status(text):
             await message.channel.send(text)

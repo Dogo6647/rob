@@ -1,5 +1,5 @@
     # /// Trust ///
-    if message.content.startswith("#!trust") and message.guild:
+    if message.content.startswith(f"{cmdprefix}trust") and message.guild:
         role = discord.utils.get(message.guild.roles, name="RobAdmin")
         if role not in message.author.roles and not message.author.guild_permissions.administrator and str(message.author.id) != str(OWNER_ID):
             await message.channel.send("...you dont have the RobAdmin role yk\ngonna need that to change my settings :3")
@@ -8,7 +8,7 @@
         parts = message.content.split(maxsplit=1)
 
         if len(parts) != 2:
-            await message.channel.send("its like #!trust <address>")
+            await message.channel.send(f"its like {cmdprefix}trust <address>")
             return
 
         address = parts[1].strip()
@@ -21,7 +21,7 @@
         return
 
     # /// Untrust ///
-    if message.content.startswith("#!untrust") and message.guild:
+    if message.content.startswith(f"{cmdprefix}untrust") and message.guild:
         role = discord.utils.get(message.guild.roles, name="RobAdmin")
         if role not in message.author.roles and not message.author.guild_permissions.administrator and str(message.author.id) != str(OWNER_ID):
             await message.channel.send("...you dont have the RobAdmin role yk\ngonna need that to change my settings :3")
@@ -30,7 +30,7 @@
         parts = message.content.split(maxsplit=1)
 
         if len(parts) != 2:
-            await message.channel.send("its like #!untrust <address>")
+            await message.channel.send(f"its like {cmdprefix}untrust <address>")
             return
 
         address = parts[1].strip()
