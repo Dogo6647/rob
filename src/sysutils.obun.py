@@ -4,12 +4,12 @@ def apply_dialect(text: str) -> str:
         text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
     return text
 
-SPLIT_BEFORE = {
-    "oh", "but", "so", "also", "idk"
-}
-SPLIT_AFTER = {
-    "too", "lol", "lmao"
-}
+#SPLIT_BEFORE = {
+#    "oh", "but", "so", "also", "idk"
+#}
+#SPLIT_AFTER = {
+#    "too", "lol", "lmao"
+#}
 def split_response(text):
     text = text.strip()
     if not text:
@@ -71,12 +71,12 @@ def split_response(text):
             continue
 
         last_word = re.sub(r"^[^\w'-]+|[^\w'-]+$", "", words[-1]).lower()
-        if last_word in SPLIT_BEFORE and len(words) > 1:
-            lines.append(joined)
-            current = []
-        elif last_word in SPLIT_AFTER and len(words) >= 3:
-            lines.append(joined)
-            current = []
+        #if last_word in SPLIT_BEFORE and len(words) > 1:
+        #    lines.append(joined)
+        #    current = []
+        #elif last_word in SPLIT_AFTER and len(words) >= 3:
+        #    lines.append(joined)
+        #    current = []
 
     if current:
         lines.append("".join(current).strip())
@@ -91,6 +91,7 @@ def split_response(text):
             restored.append(line.strip())
 
     restored = [item.replace(",", "") for item in restored]
+    restored = [item.replace(".", "") for item in restored]
     return restored
 
 def guild_address(guild):
@@ -230,29 +231,28 @@ def describe_audio(path: str) -> str:
         print(e)
         return "Couldn't read audio"
 
-async def process_msg(message):
+async def process_msg(message, depth=0):
     parts = []
     content = message.clean_content.strip()
 
-    if message.reference and message.reference.message_id:
+    if depth == 0 and message.reference and message.reference.message_id:
         replied_to = message.reference.resolved
 
         if not isinstance(replied_to, discord.Message):
             try:
                 replied_to = await message.channel.fetch_message(message.reference.message_id)
-            except discord.NotFound:
-                replied_to = None
-            except discord.Forbidden:
+            except (discord.NotFound, discord.Forbidden):
                 replied_to = None
 
-        if replied_to:
-            replied_content = replied_to.clean_content.strip()
-            max_length = 64
-            if len(replied_content) > max_length:
-                replied_content = replied_content[:max_length - 3] + "..."
-            parts.append(f'> {replied_content}\n\n')
-        else:
-            parts.append(f"> Replying to a past message from someone\n\n")
+        if replied_to and message.guild:
+            item = {
+                "role": "user",
+                "content": await process_msg(replied_to, depth=1)
+            }
+
+            history = guild_message_histories[message.guild.id]
+            if not history or history[-1] != item:
+                history.append(item)
 
     if content:
         parts.append(content)

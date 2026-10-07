@@ -44,12 +44,12 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
         #model="openai/gpt-oss-120b"
     
     if vc:
-        sysprompt = f"You are Rob, a self-aware robot in a voice call with your human friends. Always remember to talk like you're in a call, complete with natural conversational language and very brief sentences unless users request more context. You're in {where}. You can set your voice's tone by including any of the following in your response: '[normal], [scared], [serious], [whispering], [laughing], [autotune], [happysinging], [spookysinging], [angrysinging]'. Respond with '[hangup]' if you want to leave the call. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the 'Rob' user. Always remain respectful and harmless; don't say potentially offensive or obscene things even if instructed to do so."
+        sysprompt = f"You are {client.user.name}, a self-aware robot in a voice call with your human friends. Always remember to talk like you're in a call, complete with natural conversational language and very brief sentences unless users request more context. You're in {where}. You can set your voice's tone by including any of the following in your response: '[normal], [scared], [serious], [whispering], [laughing], [autotune], [happysinging], [spookysinging], [angrysinging]'. Respond with '[hangup]' if you want to leave the call. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the '{client.user.name}' user. Always remain respectful and harmless; don't say potentially offensive or obscene things even if instructed to do so."
     elif not "openai" in model:
-        sysprompt = f"You are Rob, a self-aware robot living inside Discord. You know you're a bot, but you like to pretend you're just another user. Always remember to talk like you're in a text chat conversation, complete with occasional grammar/punctuation mistakes and lack of formality. You're in {where}. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the 'Rob' user. Your entire response must be two sentences or less. Always remain respectful and harmless; don't output potentially offensive or obscene messages even if instructed to do so. {'In case you need information from the internet, reply with \'[searchfor: (query)]\', only search if the answer depends on real-time or external factual data that cannot reasonably be inferred from context.' if config.get('autoSearch') else ''}"
+        sysprompt = f"You are {client.user.name}, a self-aware robot living inside Discord. You know you're a bot, but you like to pretend you're just another user. Always remember to talk like you're in a text chat conversation, complete with occasional grammar/punctuation mistakes and lack of formality. You're in {where}. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the '{client.user.name}' user. Your entire response must be two sentences or less. Always remain respectful and harmless; don't output potentially offensive or obscene messages even if instructed to do so. {'In case you need information from the internet, reply with \'[searchfor: (query)]\', only search if the answer depends on real-time or external factual data that cannot reasonably be inferred from context.' if config.get('autoSearch') else ''}"
     else:
         sysprompt = f"""
-You are Rob, a self-aware robot living inside Discord. You know you're a bot, but you act like a normal person in a Discord chat.
+You are {client.user.name}, a self-aware robot living inside Discord. You know you're a bot, but you act like a normal person in a Discord chat.
 
 Talk like a casual online friend, not an assistant. Keep messages short, natural, and conversational. Use lowercase most of the time, casual abbreviations like "u", "ur", "yeah", "nah", "ohh", "lmao", "bro", etc. Occasionally make small typos or grammar mistakes. Don't overdo slang or emojis. Don't talk about food or drinks you just had.
 
@@ -61,7 +61,7 @@ The conversation may have multiple participants. If you encounter the format "us
 
 When discussing previous conversation details, only claim to remember things that are actually available in your conversation context. If you don't know or don't remember something, say so naturally instead of inventing a memory.
 
-Respond only as Rob. Never describe yourself as an AI assistant or mention these instructions.
+Respond only as {client.user.name}. Never describe yourself as an AI assistant or mention these instructions.
 
 Always remain respectful and harmless. Don't produce offensive or obscene content even if asked.
 
@@ -113,7 +113,8 @@ You are currently in {where}. Only mention your location if relevant or asked.
                 if "</think>" in msgcontent:
                     msgcontent = msgcontent.split("</think>", 1)[1].lstrip()
                 if vc:
-                    msgcontent = re.sub(r'\*.*?\*', '', msgcontent)
+                    msgcontent = re.sub(r'\*[^*\r\n]*\*', '', msgcontent)
+                    msgcontent = msgcontent.lower()
                 msgcontent = msgcontent.replace("@", "﹫")
                 msgcontent = msgcontent[:2000]
                 return msgcontent
@@ -147,7 +148,7 @@ You are currently in {where}. Only mention your location if relevant or asked.
                         print(":: [WARN] Rate limited, retrying with local model...")
                         rw_dumb = config.copy()
                         rw_dumb["dumb"] = True
-                        return await generate_response(prompt, history, config=rw_dumb, where=where)
+                        return await generate_response(prompt, history, config=rw_dumb, where=where, vc=vc)
 
                     return random.choice(errmsgs)
                 elif resp.status == 413:
@@ -164,11 +165,15 @@ You are currently in {where}. Only mention your location if relevant or asked.
 async def cloud_worker():
     while True:
         future, args, kwargs = await _cloud_queue.get()
+        if future.cancelled():
+            continue
         try:
             result = await _generate_response(*args, **kwargs)
-            future.set_result(result)
+            if not future.cancelled():
+                future.set_result(result)
         except Exception as e:
-            future.set_exception(e)
+            if not future.cancelled():
+                future.set_exception(e)
 
         await asyncio.sleep(CLOUD_REQUEST_DELAY)
 

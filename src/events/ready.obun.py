@@ -37,7 +37,7 @@ async def populate_guild_message_history(guild):
 async def send_random_message():
     await client.wait_until_ready()
     while not client.is_closed():
-        wait_time = random.randint(1, 4320) * 60
+        wait_time = random.randint(1, 10080) * 60
         print(f":: Waiting for {wait_time} seconds before sending a random message.")
         await asyncio.sleep(wait_time)
         for guild in client.guilds:
@@ -45,7 +45,7 @@ async def send_random_message():
             if config["randomlyMessage"]:
                 channel = get_mail_channel(guild, config, force_general=True)
                 if channel:
-                    response = await generate_response("Say something as Rob based on the chat history; focus on the last sent message. If there are no messages, start the conversation by saying something interesting.", guild_message_histories[guild.id], config.get("model"), config, f"the {guild.name} server")
+                    response = await generate_response(f"Say something as {client.user.name} based on the chat history; focus on the last sent message. If there are no messages, start the conversation by saying something interesting. Your entire response must be seven words or less.", guild_message_histories[guild.id], config.get("model"), config, f"the {guild.name} server")
                     await channel.send(response)
 
 @client.event

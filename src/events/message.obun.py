@@ -138,7 +138,7 @@ Examples of common reactions you can use:
                         response = "https://odysea.us.to/assets/dump/iamarobot.mov"
             else:
                 response = await generate_response(
-                    "Respond as Rob to the last message.",
+                    f"Respond as {client.user.name} to the last message.",
                     history,
                     config.get("model"),
                     config,
@@ -146,7 +146,7 @@ Examples of common reactions you can use:
                 )
 
             if not message.guild:
-                history.append({"role": "assistant", "content": f"Rob: {response}"})
+                history.append({"role": "assistant", "content": f"{client.user.name}: {response}"})
 
             if "[searchfor:" in response:
                 should_reply = False

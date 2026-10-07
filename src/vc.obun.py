@@ -207,13 +207,14 @@ async def join_user_voice(user, guild):
 async def leave_voice(guild):
     session = voice_sessions.pop(guild.id, None)
     if session:
+        cur = asyncio.current_task()
         for task_key in ("watchdog_task", "consumer_task"):
             task = session.get(task_key)
-            if task:
+            if task and task is not cur:
                 task.cancel()
-
         for task in list(session.get("pending_utterances", ())):
-            task.cancel()
+            if task is not cur:
+                task.cancel()
 
         receiver = session.get("receiver")
         if receiver:
@@ -396,7 +397,7 @@ async def _handle_utterance(guild, session, user_id, text):
 
         try:
             response = await generate_response(
-                "Respond as Rob, out loud, to what was just said in voice chat.",
+                f"Respond as {client.user.name}, out loud, to what was just said in voice chat.",
                 history,
                 load_config(guild.id).get("model"),
                 load_config(guild.id),
@@ -404,7 +405,7 @@ async def _handle_utterance(guild, session, user_id, text):
                 vc=True,
             )
 
-            history.append({"role": "assistant", "content": f"Rob: {response}"})
+            history.append({"role": "assistant", "content": f"{client.user.name}: {response}"})
             await _speak(guild, session, response)
 
         except asyncio.CancelledError:
