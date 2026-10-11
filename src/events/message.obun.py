@@ -3,6 +3,7 @@ async def on_message(message):
     if message.guild:
         guild_id = message.guild.id
         config = load_config(guild_id)
+        await moderation_on_message(message, config)
         if config["listen"] and message.author != client.user:
             guild_message_histories[guild_id].append({"role": "user", "content": await process_msg(message)})
         if len(guild_message_histories[guild_id]) < 2:
@@ -23,7 +24,7 @@ async def on_message(message):
         if message.guild:
             guild_daily_stats[message.guild.id] += 1
         return # Ignore itself lol
-    
+
     # --- BOT COMMANDS ---
     cmdprefix =  os.getenv("CMD_PREFIX", "#!")
     #:section src/commands/option.obun.py
@@ -41,11 +42,12 @@ async def on_message(message):
     #:section src/commands/search.obun.py
     #:section src/commands/quota.obun.py
     #:section src/commands/module.obun.py
+    #:section src/commands/moderation.obun.py
     # ------------------
-    
+
     if not config["listen"]:
         return
-    
+
     should_respond = message.mention_everyone or client.user.mentioned_in(message) or random.random() < (max(0, min(config["responseFrequency"], 100)) / 100)
     should_reply = False
     if client.user.mentioned_in(message):
@@ -54,7 +56,7 @@ async def on_message(message):
         replied_to = await message.channel.fetch_message(message.reference.message_id)
         should_reply = replied_to.author.id == client.user.id
     should_react = config["responseFrequency"] > 0 and random.random() < (max(0, min(2, 100)) / 100)
-    
+
     if should_react:
         if not should_reply:
             await asyncio.sleep(2)
@@ -64,9 +66,9 @@ async def on_message(message):
         )
         response = await generate_response(
             f"""
-React to the latest message using a single emoji. Only output the emoji. 
+React to the latest message using a single emoji. Only output the emoji.
 
-Examples of common reactions you can use: 
+Examples of common reactions you can use:
 - 🔥 for something cool,
 - 😭 for something wild,
 - 😛 for something that's fun in a chaotic way,
@@ -109,7 +111,7 @@ Examples of common reactions you can use:
     if should_respond and (
     (("join" in message.content
     or "hop on" in message.content) and
-    ("vc" in message.content or 
+    ("vc" in message.content or
     "voice" in message.content)) or
     "mic up" in message.content):
         if await join_user_voice(message.author, message.guild):

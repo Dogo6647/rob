@@ -18,7 +18,7 @@
         
         option, value = parts[1], parts[2]
         if option in config:
-            if not option == "model" and not option == "mailChannel" and not option == "mailTrusted":
+            if option not in ("model", "mailChannel", "staffChannel", "mailTrusted", "moderationRules"):
                 TRUE_VALUES = {"enable", "enabled", "on", "true", "yes"}
                 FALSE_VALUES = {"disable", "disabled", "off", "false", "no"}
                 if value.lower() in TRUE_VALUES:
@@ -31,7 +31,7 @@
                     except ValueError:
                         await message.channel.send("no not like that :X\nuse `enable`, `disable`, or a number")
                         return
-            elif option == "mailChannel":
+            elif option in ("mailChannel", "staffChannel"):
                 match = re.match(r"<#(\d+)>", value)
 
                 if match:
@@ -41,7 +41,7 @@
                 else:
                     await message.channel.send("give me a channel mention or channel id")
                     return
-            elif option == "mailTrusted" or option == "model":
+            elif option in ("mailTrusted", "moderationRules", "model"):
                 await message.channel.send(f"you cannot change that part of my config with {cmdprefix}option :X")
                 return
             else:

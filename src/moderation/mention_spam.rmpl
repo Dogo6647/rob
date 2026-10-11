@@ -1,0 +1,7 @@
+# Incrementally times out users who mention spam.
+
+mentions anyone
+less than 1 minute later; mentions the same
+less than 1 minute later; mentions the same
+timeout incremental
+warn "one ping is enough, no mention spam please..."

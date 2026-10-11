@@ -1,0 +1,4 @@
+# Kicks bots/users who send the same message to 3 different channels, then removes it.
+
+within 10 seconds; sends the same message in more than 2 different channels
+kick and delete all messages

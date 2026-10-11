@@ -1,5 +1,6 @@
 @client.event
 async def on_member_join(member):
+    await moderation_on_join(member)
     guild_id = member.guild.id
     config = load_config(guild_id)
     history = guild_message_histories[guild_id]

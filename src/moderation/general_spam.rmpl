@@ -1,0 +1,22 @@
+# Clears spam off channels that don't contain "spam" in their name. Times users out incrementally as they spam more.
+
+in channel not containing "spam"
+sends anything
+sends the same
+sends the same
+sends the same
+delete last 3 messages
+timeout for 5 seconds and warn "yes, we get it... stop it..."
+sends anything
+sends anything
+sends the same
+delete last 3 messages and timeout incremental
+
+in channel not containing "spam"
+sends anything
+less than 1 second later; sends anything
+less than 1 second later; sends anything
+less than 1 second later; sends anything
+less than 1 second later; sends anything
+timeout incremental and delete last 5 messages
+warn "you're flooding the chat :("

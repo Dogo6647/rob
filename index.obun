@@ -22,10 +22,12 @@ from bs4 import BeautifulSoup
 from contextlib import redirect_stdout
 import re
 from collections import defaultdict, deque, Counter
+from dataclasses import dataclass, field
 import numpy as np
 import soundfile as sf
 from scipy.signal import resample_poly
 from datetime import datetime
+from datetime import timedelta
 from discord.gateway import DiscordWebSocket
 from discord.ext import tasks
 from typing import Dict
@@ -131,9 +133,11 @@ user_cooldowns = {}
 #:section src/channeldetect.obun.py
 #:section src/response.obun.py
 #:section src/vc.obun.py
+#:section src/moderation.obun.py
 
 #:section src/components/letter.obun.py
 #:section src/components/phonebook.obun.py
+#:section src/components/moderation.obun.py
 
 #:section src/events/ready.obun.py
 #:section src/events/join.obun.py

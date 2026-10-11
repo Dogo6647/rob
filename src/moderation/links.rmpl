@@ -1,0 +1,14 @@
+# Protects the server against link spam and botted server invites.
+
+joins
+within 3 messages; sends message containing "https://" and ".gg/"
+kick and delete last 3 messages
+
+sends message containing "https://"
+less than 1 second later; sends message containing "https://"
+less than 1 second later; sends message containing "https://"
+timeout incremental and delete last 3 messages
+
+sends message containing "http://"
+less than 1 second later; sends message containing "http://"
+timeout incremental and delete last 2 messages

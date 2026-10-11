@@ -1,0 +1,4 @@
+# Kicks accounts created less than a week ago.
+
+joins while younger than 7 days
+kick

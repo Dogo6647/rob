@@ -1,6 +1,6 @@
 # 🥫 Rob
 A fun bot for your Discord server that can join the conversation!
-Just ping him with a message, and he'll respond back just as if he was another one of yours! 
+Just ping him with a message, and he'll respond back just as if he was another one of yours!
 Share opinions, laugh together, and level up your server with a bot that can talk, send/get custom letters to/from your trusted servers, and automatically get the chat back on track when it's inactive!
 
 [Invite Rob to your server now for $0.00!](https://discord.com/oauth2/authorize?client_id=1344543448719429673)
@@ -14,6 +14,7 @@ Share opinions, laugh together, and level up your server with a bot that can tal
     - `listen` (values: **enable/disable**) -- Turns the bot on when enabled or off when disabled. - Default is **enable**
     - `dumb` (values: **enable/disable**) -- Controls whether to generate messages with a lightweight model hosted by us instead of using groqcloud's API, which may produce less coherent responses. - Default is **disable**
     - `mailChannel` (values: **channel name starting with #**) -- Sets the channel to use for receiving letters from other servers. - Auto-detects your general channel by default.
+    - `staffChannel` (values: **channel name starting with #**) -- Sets the channel where moderation incident reports are sent. - Guesses a staff/mod channel by default.
     - `autoSearch` (values: **enable/disable**) -- Controls whether Rob can perform searches on his own or not. - Default is **disable**
     - `greet` (values: **enable/disable**) -- Make Rob automatically welcome new members in your server! - Default is **disable**
     - `announcements` (values: **enable/disable**) -- Receive important Rob announcements in your server. - Default is **enable**
@@ -26,6 +27,16 @@ Share opinions, laugh together, and level up your server with a bot that can tal
 - `#!untrust <address>` (admin) - Stops trusting another server's address, blocking them from sending you letters.
 - `#!phonebook` - Presents all addresses trusted by the current server.
 - `#!send <address> <message>` - Sends a letter to a specified robmail address.
+## Moderation:
+- `#!moderation` (mod) - Opens the moderation rule list where each Rob Moderation Pattern Language (RMPL) rule can be toggled on or off. Rob needs a role with Timeout Members, Kick Members, Ban Members and Manage Messages for moderation to be active. All rules are off by default.
+- `#!moderation rule <rulename>` (mod) - Shows exactly what a built-in or custom rule looks for and does.
+- `#!moderation newRule <rulename>` (mod) - Adds a custom rule for your server. Put the rule contents in a code block on the following lines. You can have up to 4 kB of rule text in total per server. New rules are disabled until manually enabled.
+- `#!moderation deleteRule <rulename>` (mod) - Deletes a custom rule (built-in rules can't be deleted).
+- `#!moderation clear <username>` (mod) - Resets a user's offense count (a mention or user ID also works).
+- `#!moderation watch/enable <rulename>` (mod) - Activates a moderation rule.
+- `#!moderation ignore/disable <rulename>` (mod) - Deactivates a moderation rule.
+
+All moderation commands except `clear` only work in the staff channel. Users who are kicked/banned and have their DMs open are sent a DM informing them of the moderation action taken and why.
 ## Behavior overrides:
 - `#!owobonk` - Hits Rob with the magic owo stick that temporarily uwuifies his responses.
 - `#!britbonk` - Turns Rob into a fine british gentleman.

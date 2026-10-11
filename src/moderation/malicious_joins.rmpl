@@ -1,0 +1,14 @@
+# Catches potentially malicious behavior at join time. Particularly useful against botted accounts.
+
+joins
+mentions @everyone or @here
+kick and delete last message
+
+joins
+mentions anyone
+less than 1 second later; mentions anyone
+ban and delete all messages
+
+joins
+sends message with at least 2 images
+kick and delete all messages
