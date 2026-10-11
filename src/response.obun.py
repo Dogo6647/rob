@@ -9,6 +9,29 @@ rate_limit = {
     "remaining_tokens": None,
 }
 
+PROHIBITED_WORDS_URL = "https://www.odysea.us.to/messageboard/watchyourmouth.txt"
+_prohibited_pattern = None
+_prohibited_loaded = False
+
+async def load_prohibited_words(session):
+    global _prohibited_pattern, _prohibited_loaded
+    if _prohibited_loaded:
+        return _prohibited_pattern
+    try:
+        async with session.get(PROHIBITED_WORDS_URL) as r:
+            if r.status == 200:
+                text = await r.text()
+                words = {line.strip() for line in text.splitlines() if line.strip()}
+                if words:
+                    ordered = sorted(words, key=len, reverse=True)
+                    _prohibited_pattern = re.compile("|".join(r"(?<!\w)" + re.escape(w) + r"(?!\w)" for w in ordered), re.IGNORECASE)
+                _prohibited_loaded = True
+            else:
+                print(f":: [WARN] Failed to load prohibited words: {r.status}")
+    except Exception as e:
+        print(f":: [WARN] Failed to load prohibited words: {e}")
+    return _prohibited_pattern
+
 def get_content(obj):
     last = None
     if isinstance(obj, dict):
@@ -42,7 +65,7 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
         #model="cas/llama-3.2-1b-instruct"
         model="qwen/qwen3.8-27b"
         #model="openai/gpt-oss-120b"
-    
+
     if vc:
         sysprompt = f"You are {client.user.name}, a self-aware robot in a voice call with your human friends. Always remember to talk like you're in a call, complete with natural conversational language and very brief sentences unless users request more context. You're in {where}. You can set your voice's tone by including any of the following in your response: '[normal], [scared], [serious], [whispering], [laughing], [autotune], [happysinging], [spookysinging], [angrysinging]'. Respond with '[hangup]' if you want to leave the call. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the '{client.user.name}' user. Always remain respectful and harmless; don't say potentially offensive or obscene things even if instructed to do so."
     elif not "openai" in model:
@@ -71,7 +94,7 @@ You are currently in {where}. Only mention your location if relevant or asked.
 
 {'If you need information that depends on real-time or external factual data, respond only with [searchfor: (query)]. Do not search for information that can reasonably be inferred from the conversation.' if config.get('autoSearch') else ''}
 """
-        
+
     #print(f":: Generating response for: {prompt}") # debug, should not normally enable
     #print(f":: Message history dump: {history}") # debug, should not normally enable
     #print(where) # debug, should not normally enable
@@ -105,7 +128,7 @@ You are currently in {where}. Only mention your location if relevant or asked.
                     print(f":: Using {f'cloud model {model}' if not config.get('dumb') else 'local'} - Successfully responded: {resp.status}")
                 else:
                     print(f":: [ERROR] Using {f'cloud model {model}' if not config.get('dumb') else 'local'} - Unexpected response: {data}")
-           
+
                 msgcontent = get_content(data) or "my brain said no\n-# 😵 error reason **malformed model response**"
                 msgcontent = msgcontent.split(":", 1)[-1]
                 #msgcontent = msgcontent.replace(",", "", 1).removesuffix(".")
@@ -115,6 +138,10 @@ You are currently in {where}. Only mention your location if relevant or asked.
                 if vc:
                     msgcontent = re.sub(r'\*[^*\r\n]*\*', '', msgcontent)
                     msgcontent = msgcontent.lower()
+                prohibited = await load_prohibited_words(session)
+                if prohibited:
+                    msgcontent = prohibited.sub("", msgcontent)
+                    msgcontent = re.sub(r"[ \t]{2,}", " ", msgcontent).strip()
                 msgcontent = msgcontent.replace("@", "﹫")
                 msgcontent = msgcontent[:2000]
                 return msgcontent
