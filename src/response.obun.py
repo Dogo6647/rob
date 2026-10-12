@@ -175,7 +175,7 @@ You are currently in {where}. Only mention your location if relevant or asked.
                         print(":: [WARN] Rate limited, retrying with local model...")
                         rw_dumb = config.copy()
                         rw_dumb["dumb"] = True
-                        return await generate_response(prompt, history, config=rw_dumb, where=where, vc=vc)
+                        return {"_downgrade": {"prompt": prompt, "history": history, "config": rw_dumb, "where": where, "vc": vc}}
 
                     return random.choice(errmsgs)
                 elif resp.status == 413:
@@ -225,4 +225,9 @@ async def generate_response(*args, **kwargs):
     await _cloud_queue.put((future, args, kwargs))
     print(f"\n:: Requests in queue: {_cloud_queue.qsize()}")
 
-    return await future
+    result = await future
+
+    if isinstance(result, dict) and "_downgrade" in result:
+        return await _generate_response(**result["_downgrade"])
+
+    return result
