@@ -208,7 +208,11 @@ async def generate_response(*args, **kwargs):
     global _cloud_worker_started
 
     # local model skips queue
-    config = kwargs.get("config") or load_config("userland")
+    config = kwargs.get("config")
+    if config is None and len(args) >= 4:
+        config = args[3]
+    if config is None:
+        config = load_config("userland")
     if config.get("dumb"):
         return await _generate_response(*args, **kwargs)
 
