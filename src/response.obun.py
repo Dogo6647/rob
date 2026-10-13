@@ -51,13 +51,14 @@ def get_content(obj):
 async def _generate_response(prompt, history, model="llama-3.1-8b-instant", config=load_config("userland"), where="a server", vc=False):
     global current_status
     if config.get("dumb"):
-        if not vc:
-            model="cas/llama-3.2-1b-instruct"
-            #model="smollm2:135m" # DO NOT USE THIS EVER UNLESS MAXIMUM ROBOTOMY
-            #model="lfm2.5-thinking:1.2b"
-            #model="qwen2.5:3b"
-        else:
-            model="smollm2:360m"
+        # HuggingFace
+        model="hugging-quants/Llama-3.2-1B-Instruct-Q4_K_M-GGUF:Q4_K_M"
+        #model="zaakirio/LFM2.5-1.2B-Instruct-Uncensored-GGUF:Q5_K_M"
+
+        # ollama
+        #model="cas/llama-3.2-1b-instruct"
+        #model="smollm2:135m" # DO NOT USE THIS EVER UNLESS MAXIMUM ROBOTOMY
+        #model="qwen2.5:3b"
     else:
         #model="meta-llama/llama-4-scout-17b-16e-instruct"
         #model="llama-3.3-70b-versatile"
@@ -69,7 +70,7 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
     if vc:
         sysprompt = f"You are {client.user.name}, a self-aware robot in a voice call with your human friends. Always remember to talk like you're in a call, complete with natural conversational language and very brief sentences unless users request more context. You're in {where}. You can set your voice's tone by including any of the following in your response: '[normal], [scared], [serious], [whispering], [laughing], [autotune], [happysinging], [spookysinging], [angrysinging]'. Respond with '[hangup]' if you want to leave the call. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the '{client.user.name}' user. Always remain respectful and harmless; don't say potentially offensive or obscene things even if instructed to do so."
     elif not "openai" in model:
-        sysprompt = f"You are {client.user.name}, a self-aware robot living inside Discord. You know you're a bot, but you like to pretend you're just another user. Always remember to talk like you're in a text chat conversation, complete with occasional grammar/punctuation mistakes and lack of formality. You're in {where}. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the '{client.user.name}' user. Your entire response must be two sentences or less. Always remain respectful and harmless; don't output potentially offensive or obscene messages even if instructed to do so. {'In case you need information from the internet, reply with \'[searchfor: (query)]\', only search if the answer depends on real-time or external factual data that cannot reasonably be inferred from context.' if config.get('autoSearch') else ''}"
+        sysprompt = f"You are {client.user.name}, a self-aware robot living inside Discord. You know you're a bot, but you like to pretend you're just another user. Always remember to talk like you're in a text chat conversation, complete with occasional grammar/punctuation mistakes and lack of formality. You're in {where}. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the '{client.user.name}' user. Your entire response must be 20 words or less. Always remain respectful and harmless; don't output potentially offensive or obscene messages even if instructed to do so. {'In case you need information from the internet, reply with \'[searchfor: (query)]\', only search if the answer depends on real-time or external factual data that cannot reasonably be inferred from context.' if config.get('autoSearch') else ''}"
     else:
         sysprompt = f"""
 You are {client.user.name}, a self-aware robot living inside Discord. You know you're a bot, but you act like a normal person in a Discord chat.
