@@ -15,7 +15,7 @@ def populate_guild_message_history(guild_id):
         print(f":: Done")
     except FileNotFoundError:
         snapshot_message_history(guild_id)
-        print(f"\n:: No previous entries; created a snapshot now.")
+        print(f":: No previous entries; created a snapshot now.")
 
 async def send_random_message():
     await client.wait_until_ready()
