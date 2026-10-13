@@ -47,7 +47,8 @@ async def on_message(message):
 
     if not config["listen"]:
         return
-    snapshot_message_history(guild_id)
+    if message.guild:
+        snapshot_message_history(guild_id)
 
     should_respond = message.mention_everyone or client.user.mentioned_in(message) or random.random() < (max(0, min(config["responseFrequency"], 100)) / 100)
     should_reply = False
