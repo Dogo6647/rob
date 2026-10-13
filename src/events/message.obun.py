@@ -4,10 +4,10 @@ async def on_message(message):
         guild_id = message.guild.id
         config = load_config(guild_id)
         await moderation_on_message(message, config)
+        if len(guild_message_histories[guild_id]) < 2:
+            populate_guild_message_history(guild_id)
         if config["listen"] and message.author != client.user:
             guild_message_histories[guild_id].append({"role": "user", "content": await process_msg(message)})
-        if len(guild_message_histories[guild_id]) < 2:
-            await populate_guild_message_history(message.guild)
         history = guild_message_histories[guild_id]
         if not message.channel.permissions_for(message.guild.me).send_messages:
             return
@@ -47,7 +47,8 @@ async def on_message(message):
 
     if not config["listen"]:
         return
-
+    snapshot_message_history(guild_id)
+    
     should_respond = message.mention_everyone or client.user.mentioned_in(message) or random.random() < (max(0, min(config["responseFrequency"], 100)) / 100)
     should_reply = False
     if client.user.mentioned_in(message):

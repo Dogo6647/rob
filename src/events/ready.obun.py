@@ -1,38 +1,21 @@
-history_semaphore = asyncio.Semaphore(3)
-async def fetch_channel_messages(channel):
-    async with history_semaphore:
-        try:
-            return [
-                message async for message in channel.history(
-                    limit=guild_message_histories[0].maxlen
-                )
-            ]
-        except Exception:
-            return []
-        
-async def populate_guild_message_history(guild):
-    print(f"\n:: Populating message history for guild {guild.id}...")
-    results = await asyncio.gather(
-        *(fetch_channel_messages(channel)
-          for channel in guild.text_channels)
-    )
+CACHE_DIR = "/tmp/rob-cache"
+os.makedirs(CACHE_DIR, exist_ok=True)
 
-    messages = [message for channel_messages in results for message in channel_messages]
-    messages.sort(key=lambda m: m.created_at)
-    messages = messages[-guild_message_histories[0].maxlen:]
+def snapshot_message_history(guild_id):
+    history = list(guild_message_histories[guild_id])
+    with open(f"{CACHE_DIR}/{guild_id}.json", "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False)
 
-    guild_message_histories[guild.id].clear()
-
-    processed = await asyncio.gather(
-        *(process_msg(message) for message in messages)
-    )
-
-    for message, content in zip(messages, processed):
-        guild_message_histories[guild.id].append({
-            "role": "assistant" if message.author == client.user else "user",
-            "content": content,
-        })
-    print(f":: Done")
+def populate_guild_message_history(guild_id):
+    print(f"\n:: Populating message history for guild {guild_id}...")
+    try:
+        with open(f"{CACHE_DIR}/{guild_id}.json", "r", encoding="utf-8") as f:
+            history = json.load(f)
+        guild_message_histories[guild_id] = deque(history, maxlen=12)
+        print(f":: Done")
+    except FileNotFoundError:
+        snapshot_message_history(guild_id)
+        print(f"\n:: No previous entries; created a snapshot now.")
 
 async def send_random_message():
     await client.wait_until_ready()
