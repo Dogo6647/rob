@@ -306,7 +306,7 @@ def _mod_spawn(coro):
 def _mod_message_event(message):
     norm = " ".join(message.content.lower().split())
     attachments = ",".join(f"{a.filename}:{a.size}" for a in message.attachments)
-    mentions = {f"u{u.id}" for u in message.mentions if u.id != message.author.id}
+    mentions = {f"u{u.id}" for u in message.mentions if u.id != message.author.id and not u.bot}
     mentions |= {f"r{r.id}" for r in message.role_mentions}
     mentions |= {m for m in ("@everyone", "@here") if m in message.content}
     return ModEvent(
