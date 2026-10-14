@@ -43,6 +43,5 @@ async def on_ready():
     if not changelog_checked:
         changelog_checked = True
         await broadcast()
-
-    client.loop.create_task(send_random_message())
-    change_status.start()
+        client.loop.create_task(send_random_message())
+        change_status.start()

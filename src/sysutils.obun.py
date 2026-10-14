@@ -44,7 +44,7 @@ def split_response(text):
             if len(words_after) <= 3:
                 return f"{before}, {after}"
 
-            return f"{before}\n{after}"
+            return f"{before} \n{after}"
 
         paragraph = re.sub(r"([^,\n]+),\s*([^,\n]+)", comma_split, paragraph)
         processed.append(paragraph)
@@ -90,8 +90,7 @@ def split_response(text):
         if line.strip():
             restored.append(line.strip())
 
-    restored = [item.replace(",", "") for item in restored]
-    restored = [item.replace(".", "") for item in restored]
+    restored = [re.sub(r"[,.](?= |$)", "", item) for item in restored]
     return restored
 
 def guild_address(guild):

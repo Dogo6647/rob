@@ -454,6 +454,7 @@ async def _run_wintalker(voice_name: str, text: str, out_path: str) -> bool:
             return False
 
         if proc.returncode != 0:
+            print(f":: [ERROR] Wintalker failed: {stderr}")
             return False
 
         return os.path.exists(out_path)
@@ -539,3 +540,52 @@ async def _empty_channel_watchdog(guild):
 
     except asyncio.CancelledError:
         pass
+
+
+async def send_voice_message(channel: discord.abc.Messageable, content: str, voice: str = "Fred") -> discord.Message:
+    wav_path = os.path.join(VC_TMP_DIR, f"{random.randint(10**9, 10**10)}.wav")
+    ogg_path = os.path.join(VC_TMP_DIR, "{random.randint(10**9, 10**10)}.ogg")
+
+    try:
+        generated = await _run_wintalker(voice_name=voice, text=content, out_path=wav_path)
+        if not generated:
+            return await channel.send(content)
+
+        # convert WAV to OGG/Opus for Discord voice messages
+        proc = await asyncio.create_subprocess_exec(
+            "ffmpeg",
+            "-y",
+            "-i", wav_path,
+            "-c:a", "libopus",
+            "-b:a", "64k",
+            "-vbr", "on",
+            "-application", "voip",
+            "-f", "ogg",
+            ogg_path,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.PIPE,
+        )
+
+        try:
+            _, stderr = await asyncio.wait_for(proc.communicate(), timeout=60)
+        except asyncio.TimeoutError:
+            proc.kill()
+            await proc.wait()
+            return await channel.send(content)
+        if proc.returncode != 0 or not os.path.isfile(ogg_path):
+            _safe_remove(wav_path)
+            print("no ogg")
+            return await channel.send(content)
+
+        file = discord.File(ogg_path, filename="voice-message.ogg")
+        try:
+            print(f":::: (Sent a voice message)")
+            return await channel.send(file=file)#, flags=discord.MessageFlags(voice=True))
+        finally:
+            file.close()
+            _safe_remove(wav_path)
+            _safe_remove(ogg_path)
+
+    except Exception as exc:
+        print(f":: [ERROR] Voice message failed: {exc}")
+        return await channel.send(content)

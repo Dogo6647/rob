@@ -116,10 +116,26 @@ Examples of common reactions you can use:
     ("vc" in message.content or
     "voice" in message.content)) or
     "mic up" in message.content):
-        if await join_user_voice(message.author, message.guild):
-            pass
+        if 'join_user_voice' in globals():
+            if await join_user_voice(message.author, message.guild):
+                pass
+            else:
+                await message.channel.send("...but youre not in a voice chat")
         else:
-            await message.channel.send("...but youre not in a voice chat")
+            excuses = [
+                "idk my mic sucks,,,",
+                "i dont have a mic i can use rn",
+                "no",
+                "you want me to JOIN VC?? in THIS economy????????",
+                "maybe tmrw 🥱",
+                "nah im in public",
+                "the Council wont let me use my mic",
+                "no bc im uhhhhhh... showering yeah",
+                "for what",
+                "im good thanks",
+                "sorry my mic is updating",
+            ]
+            await message.channel.send(random.choice(excuses))
         return
 
     if should_respond:
@@ -131,51 +147,64 @@ Examples of common reactions you can use:
             return
         user_cooldowns[message.author.id] = now
 
-        async with message.channel.typing():
-            if random.random() < tin_can_chance:
-                if random.randint(0, 1) == 0:
-                    response = "*tin can noises*"
-                else:
-                    if datetime.now().month == 10:
-                        response = "https://odysea.us.to/assets/dump/spookyscaryskeletons.mp4"
-                    else:
-                        response = "https://odysea.us.to/assets/dump/iamarobot.mov"
+        async def delay_typing():
+            try:
+                await asyncio.sleep(1)
+                async with message.channel.typing():
+                    await asyncio.sleep(4)
+            except asyncio.CancelledError:
+                pass
+        typing_task = asyncio.create_task(delay_typing())
+
+        if random.random() < tin_can_chance:
+            if random.randint(0, 1) == 0:
+                response = "*tin can noises*"
             else:
-                response = await generate_response(
-                    f"Respond as {client.user.name} to the last message.",
-                    history,
-                    config.get("model"),
-                    config,
-                    f"the {message.guild.name} server" if message.guild else "DMs"
-                )
-
-            if not message.guild:
-                history.append({"role": "assistant", "content": f"{client.user.name}: {response}"})
-
-            if "[searchfor:" in response:
-                should_reply = False
-
-                async def update_status(text):
-                    await message.channel.send(text)
-
-                q = response[len("[searchfor:"): -1].strip()
-                result = await websearch(q, update_status)
-
-                response = await generate_response(
-                    f"Summarize the following text so that it's relevant to the conversation: '{result}'. Use the amount of words necessary to make a detailed explanation. DO NOT use [searchfor: (query)] again.",
-                    history,
-                    config.get("model"),
-                    config,
-                    f"the {message.guild.name} server" if message.guild else "DMs"
-                )
-
-            messages = split_response(response)
-            for i, chunk in enumerate(messages):
-                if should_reply and i == 0 and not "[searchfor:" in response:
-                    await message.reply(chunk, mention_author=True if message.author.id in frens else False)
+                if datetime.now().month == 10:
+                    response = "https://odysea.us.to/assets/dump/spookyscaryskeletons.mp4"
                 else:
-                    await message.channel.send(chunk)
+                    response = "https://odysea.us.to/assets/dump/iamarobot.mov"
+        else:
+            response = await generate_response(
+                f"Respond as {client.user.name} to the last message.",
+                history,
+                config.get("model"),
+                config,
+                f"the {message.guild.name} server" if message.guild else "DMs"
+            )
+            typing_task.cancel()
 
-                # sleep between responses
-                if i < len(messages) - 1:
-                    await asyncio.sleep(random.uniform(0.5, 3))
+        if not message.guild:
+            history.append({"role": "assistant", "content": f"{client.user.name}: {response}"})
+
+        if "[searchfor:" in response:
+            should_reply = False
+
+            async def update_status(text):
+                await message.channel.send(text)
+
+            q = response[len("[searchfor:"): -1].strip()
+            result = await websearch(q, update_status)
+
+            response = await generate_response(
+                f"Summarize the following text so that it's relevant to the conversation: '{result}'. Use the amount of words necessary to make a detailed explanation. DO NOT use [searchfor: (query)] again.",
+                history,
+                config.get("model"),
+                config,
+                f"the {message.guild.name} server" if message.guild else "DMs"
+            )
+        
+        if 'send_voice_message' in globals() and random.random() < (max(0, min(1, 100)) / 100):
+            await send_voice_message(message.channel, response)
+            return
+        
+        messages = split_response(response)
+        for i, chunk in enumerate(messages):
+            if should_reply and i == 0 and not "[searchfor:" in response:
+                await message.reply(chunk, mention_author=True if message.author.id in frens else False)
+            else:
+                await message.channel.send(chunk)
+
+            # sleep between responses
+            if i < len(messages) - 1:
+                await asyncio.sleep(random.uniform(0.5, 2.5))
