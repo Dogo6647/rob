@@ -40,7 +40,7 @@ async def on_message(message):
     #:section src/commands/britbonk.obun.py
     #:section src/commands/custombonk.obun.py
     #:section src/commands/search.obun.py
-    #:section src/commands/quota.obun.py
+    #:section src/commands/model.obun.py
     #:section src/commands/module.obun.py
     #:section src/commands/moderation.obun.py
     # ------------------

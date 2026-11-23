@@ -40,10 +40,11 @@ All moderation commands except `clear` only work in the staff channel. Users who
 ## Behavior overrides:
 - `#!owobonk` - Hits Rob with the magic owo stick that temporarily uwuifies his responses.
 - `#!britbonk` - Turns Rob into a fine british gentleman.
+- `#!custombonk <description>` - Tell Rob how to act.
 ## Misc:
 - `#!help` - Sends a link to Rob's official website.
 - `#!about` - Shows bot credits and interaction stats.
-- `#!quota` - Shows how much the bot has used the groqcloud API.
+- `#!model` - Shows the last model used to generate a response successfully (or notes if dumb mode is enabled).
 - `#!search` - Searches for stuff on the web using DuckDuckGo and provides a Rob-certified™ summary.
 - `#!dadjoke` - Sends a random joke from the [icanhazadadjoke](https://icanhazdadjoke.com/) API
 - `#!module` - Gets a random song from [modarchive.org](https://modarchive.org/). Keep in mind *some* of the content there may be explicit!
