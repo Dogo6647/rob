@@ -245,7 +245,7 @@ async def process_msg(message, depth=0):
 
         if replied_to and message.guild:
             item = {
-                "role": "user",
+                "role": "assistant" if replied_to.author.id == client.user.id else "user",
                 "content": await process_msg(replied_to, depth=1)
             }
 
@@ -308,7 +308,7 @@ async def process_msg(message, depth=0):
 
 
     final_msg = " ".join(parts)[:512]
-    return f"{message.author.name} {f'(in #{message.channel})' if message.guild else ''}: {final_msg}"
+    return f"{message.author.name}{f' (in #{message.channel})' if message.guild else ''}: {final_msg}"
 
 async def websearch(query: str, status_callback=None):
     if status_callback:

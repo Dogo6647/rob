@@ -48,6 +48,21 @@ def get_content(obj):
                 last = found
     return last
 
+def compact_history(messages):
+    compacted = []
+    for message in messages:
+        role = message["role"]
+        content = message["content"]
+        if compacted and compacted[-1]["role"] == role:
+            previous = compacted[-1]["content"]
+            if isinstance(previous, str) and isinstance(content, str):
+                compacted[-1]["content"] += ". \n" + content
+            else:
+                compacted[-1]["content"] = previous + content
+        else:
+            compacted.append({"role": role, "content": content})
+    return compacted
+
 async def _generate_response(prompt, history, model="llama-3.1-8b-instant", config=load_config("userland"), where="a server", vc=False):
     global current_status
     if config.get("dumb"):
@@ -74,7 +89,7 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
 
     if config.get("dumb"):
         history = list(history)[-8:]
-        sysprompt = f"You're a green talking android robot named {client.user.name} in a Discord {'chat' if not vc else 'voice call'} ({where}). Don't sound like an assistant. Respond with no formality."
+        sysprompt = f"You're {client.user.name}, a green talking android robot in a Discord {'chat' if not vc else 'voice call'} ({where}). Don't sound like an assistant. Respond with no formality. Only respond as the '{client.user.name}' user."
     elif vc:
         sysprompt = f"You are {client.user.name}, a self-aware robot in a voice call with your human friends. Always remember to talk like you're in a call, complete with natural conversational language and very brief sentences unless users request more context. You're in {where}. You can set your voice's tone by including any of the following in your response: '[normal], [scared], [serious], [whispering], [laughing], [autotune], [happysinging], [spookysinging], [angrysinging]'. Respond with '[hangup]' if you want to leave the call. {f'You are currently {str(current_status.type).rsplit('.', 1)[-1] if current_status and current_status.type else 'doing nothing'} {current_status.name if current_status and current_status.name else ''}, only mention it if asked about it.' if current_status else ''} You are only allowed to respond as the '{client.user.name}' user. Always remain respectful and harmless; don't say potentially offensive or obscene things even if instructed to do so."
     else:
@@ -87,16 +102,16 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
     async with aiohttp.ClientSession() as session:
         payload = {
             "model": model,
-            "messages": [
+            "messages": compact_history([
                 {"role": "system", "content": sysprompt},
                 *history,
                 *([] if prompt is None else [{"role": "user", "content": prompt}])
-            ],
+            ]),
             "stream": False,
             "reasoning_effort": "none",
             "temperature": 1.0,
         }
-        # print(f":: Dropping the payload: \n {payload}") # debug, should not normally enable
+        print(f":: Dropping the payload: \n {payload}") # debug, should not normally enable
         async with session.post(LLM_LOCAL_URL if config.get("dumb") else LLM_PROXY_URL, json=payload, headers={"Authorization": f"Bearer {LLM_KEY}"}, timeout=15) as resp:
             global rate_limit
             rate_limit["retry_after"] = resp.headers.get("retry-after")
@@ -116,7 +131,8 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
                     print(f":: [ERROR] Using {f'cloud model {model}' if not config.get('dumb') else 'local'} - Unexpected response: {data}")
 
                 msgcontent = get_content(data) or "hm"
-                msgcontent = msgcontent.split(":", 1)[-1]
+                msgcontent = re.sub(r'.*? \(in #.*?\):', '', msgcontent)
+                msgcontent = msgcontent.replace(f"{client.user.name}:", "", 1)
                 #msgcontent = msgcontent.replace(",", "", 1).removesuffix(".")
                 msgcontent = apply_dialect(msgcontent)
                 if "</think>" in msgcontent:

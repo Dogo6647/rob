@@ -166,7 +166,7 @@ Examples of common reactions you can use:
                     response = "https://odysea.us.to/assets/dump/iamarobot.mov"
         else:
             response = await generate_response(
-                f"Respond as {client.user.name} to the last message.",
+                None,#f"Respond as {client.user.name} to the last message.",
                 history,
                 config.get("model"),
                 config,
@@ -193,11 +193,11 @@ Examples of common reactions you can use:
                 config,
                 f"the {message.guild.name} server" if message.guild else "DMs"
             )
-        
+
         if 'send_voice_message' in globals() and random.random() < (max(0, min(1, 100)) / 100):
             await send_voice_message(message.channel, response)
             return
-        
+
         messages = split_response(response)
         for i, chunk in enumerate(messages):
             if should_reply and i == 0 and not "[searchfor:" in response:

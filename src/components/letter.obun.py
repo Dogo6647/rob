@@ -9,3 +9,8 @@ class LetterView(discord.ui.View):
             self.letter_text,
             ephemeral=True
         )
+
+    @discord.ui.button(label="dm me a copy", style=discord.ButtonStyle.secondary)
+    async def dm_copy(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.user.send(self.letter_text)
+        await interaction.response.send_message("dm sent! :D", ephemeral=True)
