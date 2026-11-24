@@ -4,7 +4,7 @@
 _DEFAULT_CLOUD_MODELS = {
     "ollama": "gemma4:31b",
     "groq": "qwen/qwen3.8-27b",
-    "pollinations": "openai/gpt-5-nano",
+    "pollinations": "meta/llama-3.3-70b-instruct",
 }
 
 def _env_value(*names):
