@@ -126,8 +126,10 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
             url = attempt.get("url")
             key = attempt.get("key")
             provider_model = attempt.get("model") or model
-            if not url or not key:
+            if not url:
                 continue
+            # local providers don't need an auth key
+            headers = {"Authorization": f"Bearer {key}"} if key else {}
 
             payload = {
                 "model": provider_model,
@@ -143,7 +145,7 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
             #print(f":: Dropping the payload: \n {payload}") # debug, should not normally enable
             last_provider = provider_name
             try:
-                async with session.post(url, json=payload, headers={"Authorization": f"Bearer {key}"}, timeout=15) as resp:
+                async with session.post(url, json=payload, headers=headers, timeout=15) as resp:
                     global rate_limit
                     rate_limit["retry_after"] = resp.headers.get("retry-after")
                     rate_limit["limit_requests"] = resp.headers.get("x-ratelimit-limit-requests")
