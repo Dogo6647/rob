@@ -238,7 +238,8 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
     elif last_status in (408, 504):
         return "uuuuhhhhhhhhhhhhhhhhhhh... idk :P"
     elif last_status is not None:
-        return f"i am dead :P\ntry checking your config or messaging me later\n-# 😵 error reason **{last_status} {last_reason}**"
+        return random.choice(errmsgs)
+        #return f"i am dead :P\ntry checking your config or messaging me later\n-# 😵 error reason **{last_status} {last_reason}**"
     else:
         if not dumb and prompt != "":
             print(":: [WARN] All cloud providers failed, retrying with local model...")
