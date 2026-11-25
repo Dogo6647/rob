@@ -158,6 +158,13 @@ async def _generate_response(prompt, history, model="llama-3.1-8b-instant", conf
 
                     if resp.status == 200:
                         data = await resp.json()
+                        if provider_name.lower() == "pollinations" and "The account behind this API key doesn't have enough credits" in str(data):
+                            last_status = 402
+                            last_reason = "Insufficient credits"
+                            last_body = str(data)
+                            print(f":: [ERROR] Using model {provider_model} ({provider_name}) - Account has insufficient credits")
+                            print(":: Falling back to the next provider...")
+                            continue
                         if data.get("model"):
                             provider_model = data.get("model")
                         if get_content(data):
